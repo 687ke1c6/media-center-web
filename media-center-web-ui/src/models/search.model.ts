@@ -1,3 +1,5 @@
+import { Session } from "./session.model";
+
 export type SearchResultItem = {
     added: string;
     category: string;
@@ -11,4 +13,12 @@ export type SearchResultItem = {
     size: string;
     status: string;
     username: string;
+}
+
+export type SearchResultSessionItem = {
+    item: SearchResultItem;
+    meta: {
+        badges: string[]
+    },
+    session?: Session['arguments']['torrents'][number];
 }

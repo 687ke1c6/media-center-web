@@ -8,6 +8,15 @@ export const postJson = <TResult>(url: Parameters<(typeof fetch)>[0], body: obje
         body: JSON.stringify(body)
     }).then(r => r.json() as TResult);
 
+export const postJsonOnly = (url: Parameters<(typeof fetch)>[0], body: object) =>
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    }).then(r => !r.ok && (() => {throw Error(r.status.toString())})());
+
 export const getJson = <TResult>(url: Parameters<(typeof fetch)>[0]) =>
     fetch(url, {
         method: 'GET',

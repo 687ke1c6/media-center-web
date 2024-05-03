@@ -13,11 +13,14 @@ mod models;
 const PATH_TO_CONFIG: &'static str = "./media-center-web-ui/dist";
 
 #[cfg(not(debug_assertions))]
-const PATH_TO_CONFIG: &'static str = "./media-center-web-ui/dist";
+const PATH_TO_CONFIG: &'static str = "./www";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let _ = dotenvy::dotenv();
+
     let args = Args::parse();
+    println!("Media Center Web");
 
     // build our application with a single route
     let app = Router::new()

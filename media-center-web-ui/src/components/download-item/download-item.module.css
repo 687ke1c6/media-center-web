@@ -1,0 +1,16 @@
+.downloadItem {
+    transition: opacity 150ms linear;
+}
+
+.downloadItem.slideIn {
+    opacity: 0.3;
+}
+
+.slider {
+    right: calc(-1 * var(--panel-width));
+    transition: all 250ms ease-in-out;
+}
+
+.slider.slideIn {
+    right: 0;
+}

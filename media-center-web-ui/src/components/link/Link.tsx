@@ -7,7 +7,7 @@ type Props = {
 }
 
 const Link = (props: ParentProps<Props>) =>
-    <a class={props.classNames} href="#" onClick={props.linkClicked}>
+    <a class={props.classNames} href={props.to} onClick={props.linkClicked}>
         {props.children}
     </a>
 

@@ -22,8 +22,12 @@
     "vite": "^5.2.0"
   },
   "dependencies": {
+    "@solidjs/router": "^0.13.2",
     "@tanstack/solid-query": "^5.32.0",
+    "@types/lodash": "^4.17.0",
     "classnames": "^2.5.1",
+    "lodash": "^4.17.21",
+    "rxjs": "^7.8.1",
     "solid-js": "^1.8.16",
     "vite-plugin-solid": "^2.10.2"
   }

@@ -1,11 +1,15 @@
 import { SearchResultItem } from '../models/search.model';
-import {postJson} from './fetch-service';
+import { Session } from '../models/session.model';
+import {postJson, postJsonOnly} from './fetch-service';
 
 export const postSearch = (searchTerm: string) =>
     postJson<SearchResultItem[]>('/api/search', {search_term: searchTerm});
 
-export const postRemote = (data: any) =>
-    postJson<any>('/api/remote', data);
+export const postTorrentAdd = (data: SearchResultItem & {downloadDir: string}) =>
+    postJsonOnly('/api/torrent-add', data);
 
-export const postTorrentAdd = (data: SearchResultItem) =>
-    postJson<any>('/api/torrent-add', data);
+export const postTorrentGet = () =>
+    postJson<Session>('/api/torrent-get', {});
+
+export const postTorrentRemove = (data: {ids: number[], remove: boolean}) =>
+    postJsonOnly('/api/torrent-remove', data);
