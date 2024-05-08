@@ -173,7 +173,7 @@ async fn torrent_add(Json(json): Json<serde_json::Value>) -> Response {
         speed_limit_up: Some(10),
         speed_limit_up_enabled: Some(true),
         script_torrent_done_enabled: Some(true),
-        script_torrent_done_filename: Some("~/torrent-done-script.sh".to_string()),
+        script_torrent_done_filename: Some("/torrent-done-script.sh".to_string()),
         ..SessionSetArgs::default()
     };
 
