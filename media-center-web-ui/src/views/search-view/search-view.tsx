@@ -1,4 +1,4 @@
-import { Match, Switch, createSignal, onMount, onCleanup, type JSX, useContext, For, createEffect } from "solid-js";
+import { Match, Switch, createSignal, onMount, onCleanup, type JSX, useContext, For } from "solid-js";
 import { createStore } from 'solid-js/store';
 import Button from "../../components/button/button";
 import SearchBar from "../../components/search-bar/SearchBar";
@@ -21,16 +21,19 @@ const SearchView = () => {
     const searchQuery = createQuery(() => ({
         queryKey: ['searchQuery', input()],
         enabled: false,
-        queryFn: () =>
-            (import.meta.env.VITE_SAMPLE_DATA ?
+        queryFn: ({signal}) => {
+            signal.onabort = (ev) => console.log('aborted');
+            return (import.meta.env.VITE_SAMPLE_DATA ?
                 resolveAfter(sampleData, 1000) :
-                postSearch(input()))
+                postSearch(input(), {signal}))
                 .then(searchResults =>
                     searchResults.map(searchResult => ({
                         item: searchResult,
                         meta: {
                             badges: Object.entries({
                                 h264: searchResult.name.toLowerCase().includes('h264'),
+                                x264: searchResult.name.toLowerCase().includes('x264'),
+                                x265: searchResult.name.toLowerCase().includes('x265'),
                                 h265: searchResult.name.toLowerCase().includes('h265'),
                                 hvec: searchResult.name.toLowerCase().includes('hvec'),
                                 p1080: searchResult.name.toLowerCase().includes('1080p'),
@@ -43,11 +46,13 @@ const SearchView = () => {
                     setResults(searchResults);
                     return searchResults;
                 })
+            }
     }))
+
+    
 
     const onDownload = async (searchItem: SearchResultSessionItem, downloadDir: string) => {
         try {
-            
             await postTorrentAdd({ ...searchItem.item, downloadDir });
             setSelectedItem(undefined);
         } catch (e) {
