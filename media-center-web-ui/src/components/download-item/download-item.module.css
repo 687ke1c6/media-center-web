@@ -8,9 +8,11 @@
 
 .slider {
     right: calc(-1 * var(--panel-width));
+    opacity: 0;
     transition: all 250ms ease-in-out;
 }
 
 .slider.slideIn {
-    right: 0;
+    right: 0; 
+    opacity: 1;
 }

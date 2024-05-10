@@ -22,3 +22,5 @@ export type Session = {
     };
     result: string;
 }
+
+export type Torrent = Session['arguments']['torrents'][number];

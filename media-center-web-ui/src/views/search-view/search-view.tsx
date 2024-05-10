@@ -21,9 +21,8 @@ const SearchView = () => {
     const searchQuery = createQuery(() => ({
         queryKey: ['searchQuery', input()],
         enabled: false,
-        queryFn: ({signal}) => {
-            signal.onabort = (ev) => console.log('aborted');
-            return (import.meta.env.VITE_SAMPLE_DATA ?
+        queryFn: ({signal}) =>
+            (import.meta.env.VITE_SAMPLE_DATA ?
                 resolveAfter(sampleData, 1000) :
                 postSearch(input(), {signal}))
                 .then(searchResults =>
@@ -46,10 +45,7 @@ const SearchView = () => {
                     setResults(searchResults);
                     return searchResults;
                 })
-            }
-    }))
-
-    
+    }))  
 
     const onDownload = async (searchItem: SearchResultSessionItem, downloadDir: string) => {
         try {
@@ -62,7 +58,6 @@ const SearchView = () => {
 
     onMount(() => {
         const disposable = torrentsObservable.subscribe(session => {
-            console.log(session);
             session.arguments.torrents.forEach(torrent => {
                 setResults(
                     result => torrent.hashString.toLowerCase() === result.item.info_hash.toLowerCase(),

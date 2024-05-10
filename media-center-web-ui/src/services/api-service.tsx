@@ -13,3 +13,6 @@ export const postTorrentGet = () =>
 
 export const postTorrentRemove = (data: {ids: number[], remove: boolean}) =>
     postJsonOnly('/api/torrent-remove', data);
+
+export const postTorrentInfo = (data: {id: string}) =>
+    postJson('/api/torrent-info')(data);

@@ -11,7 +11,7 @@ use axum::{
 use reqwest::{Client, RequestBuilder};
 use serde_json::json;
 use transmission_rpc::{
-    types::{Id, SessionSetArgs, TorrentAddArgs, TorrentGetField},
+    types::{Id, SessionSetArgs, TorrentAddArgs},
     TransClient,
 };
 
@@ -23,6 +23,7 @@ pub fn api_route(args: Args) -> Router {
         .route("/torrent-remove", post(torrent_remove))
         .route("/torrent-get", post(torrent_get))
         .route("/torrent-add", post(torrent_add))
+        .route("/torrent-info", post(torrent_info))
         .with_state(args)
 }
 
@@ -79,34 +80,26 @@ async fn search(State(args): State<Args>, Json(json): Json<serde_json::Value>) -
     StatusCode::INTERNAL_SERVER_ERROR.into_response()
 }
 
+async fn torrent_info(Json(_json): Json<serde_json::Value>) -> Response {
+    println!("POST: /api/torrent-info");
+    println!("{:#}", _json);
+    let transmission_ipv4 = env::var("TRANSMISSION_IPV4").unwrap_or("127.0.0.1".to_string());
+    let transmission_url = format!("http://{}:9091/transmission/rpc", transmission_ipv4);
+    let mut _client = TransClient::new(transmission_url.parse().unwrap());
+    // client.torrent_add(add)
+    StatusCode::OK.into_response()
+}
+
 async fn torrent_get(Json(_json): Json<serde_json::Value>) -> Response {
     println!("GET: /api/torrent-get");
     let transmission_ipv4 = env::var("TRANSMISSION_IPV4").unwrap_or("127.0.0.1".to_string());
     let transmission_url = format!("http://{}:9091/transmission/rpc", transmission_ipv4);
     let mut client = TransClient::new(transmission_url.parse().unwrap());
 
-    let fields = vec![
-        TorrentGetField::Error,
-        TorrentGetField::ErrorString,
-        TorrentGetField::Eta,
-        TorrentGetField::Id,
-        TorrentGetField::IsFinished,
-        TorrentGetField::LeftUntilDone,
-        TorrentGetField::Name,
-        TorrentGetField::PeersGettingFromUs,
-        TorrentGetField::PeersSendingToUs,
-        TorrentGetField::RateDownload,
-        TorrentGetField::RateUpload,
-        TorrentGetField::SizeWhenDone,
-        TorrentGetField::Status,
-        TorrentGetField::UploadRatio,
-        TorrentGetField::Labels,
-        TorrentGetField::TorrentFile,
-        TorrentGetField::HashString,
-    ];
-    let get_restult = client.torrent_get(Some(fields), None).await;
-    match get_restult {
+    let get_result = client.torrent_get(None, None).await;
+    match get_result {
         Ok(response) => {
+            //println!("{:#?}", &response);
             let proxy = RpcResponseProxy::from_original(&response);
             let js = json!(proxy);
             return Json(js).into_response();
