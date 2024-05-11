@@ -21,6 +21,7 @@ const SearchView = () => {
     const searchQuery = createQuery(() => ({
         queryKey: ['searchQuery', input()],
         enabled: false,
+        retry: false,
         queryFn: ({signal}) =>
             (import.meta.env.VITE_SAMPLE_DATA ?
                 resolveAfter(sampleData, 1000) :
