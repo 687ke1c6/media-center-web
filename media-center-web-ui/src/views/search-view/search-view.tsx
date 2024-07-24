@@ -1,16 +1,16 @@
 import { Match, Switch, createSignal, onMount, onCleanup, type JSX, useContext, For } from "solid-js";
 import { createStore } from 'solid-js/store';
-import Button from "../../components/button/button";
-import SearchBar from "../../components/search-bar/SearchBar";
 import { postSearch, postTorrentAdd } from "../../services/api-service";
 import { SearchResultSessionItem } from "../../models/search.model";
 import { createQuery } from "@tanstack/solid-query";
+import { resolveAfter } from "../../utils/promise.utils";
+import { spaceY } from "../../utils/tailwind.utils";
+import Button from "../../components/button/button";
+import SearchBar from "../../components/search-bar/SearchBar";
 import Dialog from "../../components/dialog/dialog";
 import TorrentItemView from "../torrent-item-view/torrent-item-view";
 import SocketContext from "../../contexts/socket-context";
 import SearchItem from "../../components/search-item/search-item";
-import { resolveAfter } from "../../utils/promise.utils";
-import { spaceY } from "../../utils/tailwind.utils";
 
 const SearchView = () => {
     const { torrentsObservable } = useContext(SocketContext);
@@ -75,7 +75,7 @@ const SearchView = () => {
         setSelectedItem(searchItem);
     }
 
-    const onSubmit: JSX.EventHandler<HTMLFormElement, SubmitEvent> = (e: Event) => {
+    const onSubmit: JSX.EventHandler<HTMLFormElement, SubmitEvent> = (e) => {
         e.preventDefault();
         searchQuery.refetch();
     }

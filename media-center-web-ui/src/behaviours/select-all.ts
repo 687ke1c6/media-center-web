@@ -1,8 +1,11 @@
+import { filter, fromEvent } from "rxjs";
 import { onCleanup } from "solid-js";
 
-export const selectAllBehaviour = () => 
+export const selectAllBehaviour = () =>
     (el: HTMLElement) => {
-        const handler = () => (el as HTMLInputElement).select();
-        el.addEventListener('click', handler);
-        onCleanup(() => el.removeEventListener('click', handler));
+        const onClickEvent = fromEvent<PointerEvent>(el, 'click')
+            .pipe(filter(e => e.pointerType !== 'touch'))
+            .subscribe(() => (el as HTMLInputElement).select());
+        onCleanup(() => 
+            onClickEvent.unsubscribe());
     }
