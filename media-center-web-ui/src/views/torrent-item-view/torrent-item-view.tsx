@@ -1,11 +1,13 @@
-import { For, ParentProps, createSignal } from "solid-js";
+import { For, ParentProps, createSignal, onMount } from "solid-js";
 import { SearchResultSessionItem } from "../../models/search.model";
 import Button from "../../components/button/button";
 import _ from 'lodash';
 import { toCategory, toDate, toSize } from "../../utils/data.utils";
 import { clickOutsideBehaviour } from "../../behaviours/clicked-outside";
-import Select from "../../components/select/select";
 import { DownloadIcon } from "../../components/ux/download-icon/download-icon";
+import RollButton from "../../components/button/roll-button";
+
+const localStorageCatagoriesKey = 'catagories';
 
 type Props = {
     searchItem: SearchResultSessionItem;
@@ -20,11 +22,23 @@ const itemConfiguration: Record<string, (val: string) => string> = {
 }
 
 const TorrentItemView = (props: ParentProps<Props>) => {
-    const [folder, setFolder] = createSignal(props.searchItem.item.category === "208" ? 'Shows' : 'Movies');
+    const [folder, setFolder] = createSignal('');
+
+    onMount(() => {
+        const catagories: Record<string, string> = JSON.parse(localStorage.getItem(localStorageCatagoriesKey) ?? "{}");
+        console.log(catagories);
+        const folderForCatagory = catagories[props.searchItem.item.category];
+        if (folderForCatagory) {
+            setFolder(folderForCatagory);
+        }
+    })
 
     const onSubmit: HTMLFormElement['onsubmit'] = (e) => {
         e.preventDefault();
         props.onDownload?.(props.searchItem, folder());
+        const catagories: Record<string, string> = JSON.parse(localStorage.getItem(localStorageCatagoriesKey) ?? "{}");
+        catagories[props.searchItem.item.category] = folder();
+        localStorage.setItem(localStorageCatagoriesKey, JSON.stringify(catagories));
     }
 
     return <>
@@ -42,7 +56,7 @@ const TorrentItemView = (props: ParentProps<Props>) => {
                 <hr class="mt-2 mb-2 opacity-50" />
                 <div class="flex gap-2 justify-end">
                     {!props.searchItem.session && <>
-                        <Select items={['Movies', 'Shows']} value={folder()} onChange={(selection) => setFolder(selection)} />
+                        <RollButton type="button" options={props.searchItem.meta.dirs} selectedValue={folder} onSelected={(_, item) => setFolder(item!)} itemRenderer={(i) => i ?? ''}  />
                         <Button type="submit">
                             <div class="flex items-center">
                                 <DownloadIcon />

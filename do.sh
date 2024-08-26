@@ -4,7 +4,6 @@ IFS=$'\n\t'
 
 case $1 in
     debug )
-        [[ -e .env ]] && source .env
         cargo install cargo-watch
         cargo watch -x run -w src
     ;;

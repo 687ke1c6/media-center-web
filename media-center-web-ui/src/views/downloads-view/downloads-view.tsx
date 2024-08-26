@@ -25,9 +25,9 @@ const DownloadsView = () => {
     }
 
     return <div>
-        <Switch fallback={<div class="flex justify-center items-center"><p>No downloads...</p></div>}>
+        <Switch fallback={<div class="flex justify-center items-center"><p>...no downloads [ yet! ]...</p></div>}>
             <Match when={torrents.torrents.length}>
-                <div class={`divide-y divide-dashed mx-2 ${spaceY}`}>
+                <div class={`divide-y divide-dashed divide-gray-300 dark:divide-gray-500 mx-2 ${spaceY}`}>
                     <For each={torrents.torrents}>
                         {torrent =>
                             <DownloadItem torrent={torrent} onInfoClick={onTorrentClick} />

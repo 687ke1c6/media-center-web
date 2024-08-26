@@ -4,7 +4,8 @@ import { selectAllBehaviour } from "../../behaviours/select-all";
 const inputStyle = [
     'peer',
     'text-lg p-4 rounded border-b border-gray-400 grow', 'pt-6', 'pb-2',
-    'focus-visible:border-white', 'focus-visible:outline-none'
+    'focus-visible:border-white', 'focus-visible:outline-none',
+    'bg-gray-100 dark:bg-black'
 ];
 
 const labelStyle = [

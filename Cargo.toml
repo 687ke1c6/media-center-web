@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 axum = { version = "0.7.5" }
-clap = { version = "4.5.0", features = ["derive"] }
+clap = { version = "4.5.0", features = ["derive", "env"] }
 tokio = { version = "1.37.0", features = ['full'] }
 tower = "0.4.13"
 tower-http = { version = "0.5.2",  features = ["full"] }

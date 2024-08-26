@@ -17,14 +17,15 @@ const PATH_TO_CONFIG: &'static str = "./www";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let _ = dotenvy::dotenv();
+    dotenvy::dotenv().ok();
 
     let args = Args::parse();
     println!("Media Center Web");
+    dbg!(&args);
 
     // build our application with a single route
     let app = Router::new()
-        .nest("/api", api_route(args.clone()))
+        .nest("/api", api_route(args))
         .fallback_service(ServeDir::new(PATH_TO_CONFIG));
 
     // run our app with hyper, listening globally on port 3000

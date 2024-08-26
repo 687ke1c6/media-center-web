@@ -3,7 +3,6 @@ import { createStore } from 'solid-js/store';
 import { postSearch, postTorrentAdd } from "../../services/api-service";
 import { SearchResultSessionItem } from "../../models/search.model";
 import { createQuery } from "@tanstack/solid-query";
-import { resolveAfter } from "../../utils/promise.utils";
 import { spaceY } from "../../utils/tailwind.utils";
 import Button from "../../components/button/button";
 import SearchBar from "../../components/search-bar/SearchBar";
@@ -22,12 +21,10 @@ const SearchView = () => {
         queryKey: ['searchQuery', input()],
         enabled: false,
         retry: false,
-        queryFn: ({signal}) =>
-            (import.meta.env.VITE_SAMPLE_DATA ?
-                resolveAfter(sampleData, 1000) :
-                postSearch(input(), {signal}))
+        queryFn: ({ signal }) =>
+            postSearch(input(), { signal })
                 .then(searchResults =>
-                    searchResults.map(searchResult => ({
+                    searchResults.response.map(searchResult => ({
                         item: searchResult,
                         meta: {
                             badges: Object.entries({
@@ -39,14 +36,16 @@ const SearchView = () => {
                                 p1080: searchResult.name.toLowerCase().includes('1080p'),
                                 p720: searchResult.name.toLowerCase().includes('720p')
                             }).filter(([, include]) => include)
-                                .map(([key]) => key)
+                                .map(([key]) => key),
+                            dirs: searchResults.dirs
                         }
-                    })))
+                    }))
+                )
                 .then(searchResults => {
                     setResults(searchResults);
                     return searchResults;
                 })
-    }))  
+    }))
 
     const onDownload = async (searchItem: SearchResultSessionItem, downloadDir: string) => {
         try {
@@ -112,48 +111,3 @@ const SearchView = () => {
 }
 
 export default SearchView;
-
-const sampleData = [
-    {
-        "added": "1709788801",
-        "category": "208",
-        "id": "74799069",
-        "imdb": "tt0182576",
-        "info_hash": "317A2567CBF5190AAB315CE6CC791D469F408346",
-        "leechers": "980",
-        "name": "Family Guy S22E10 1080p WEB h264-BAE",
-        "num_files": "0",
-        "seeders": "1566",
-        "size": "548117358",
-        "status": "vip",
-        "username": "jajaja"
-    },
-    {
-        "added": "1711590601",
-        "category": "208",
-        "id": "74943042",
-        "imdb": "tt0182576",
-        "info_hash": "3D671EC3D6EF86D50B1B8CAAB13E3A8A9DFD935E",
-        "leechers": "741",
-        "name": "Family Guy S22E13 1080p WEB H264-SuccessfulCrab",
-        "num_files": "0",
-        "seeders": "609",
-        "size": "531291402",
-        "status": "vip",
-        "username": "jajaja"
-    },
-    {
-        "added": "1711590601",
-        "category": "208",
-        "id": "74943042",
-        "imdb": "tt0182576",
-        "info_hash": "3D671EC3D6EF86D50B1B8CAAB13E3A8A9DFD935E",
-        "leechers": "741",
-        "name": "Family.Guy.S22E13.720p.WEB.x264.SuccessfulCrabsadfaeiea.asfkoeuiwelerelrelerere",
-        "num_files": "0",
-        "seeders": "609",
-        "size": "531291402",
-        "status": "vip",
-        "username": "jajaja"
-    }
-];

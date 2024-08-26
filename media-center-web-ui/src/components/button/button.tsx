@@ -7,7 +7,7 @@ type Props = JSX.IntrinsicElements['button'] & {
 
 const common = [
     'rounded', 'w-max',
-    'hover:outline', 'hover:outline-offset-2', 'hover:bg-gray-900',
+    'hover:outline', 'hover:outline-offset-2', 'dark:hover:bg-gray-900',
     'disabled:cursor-not-allowed disabled:pointer-events-none disabled:border-white disabled:opacity-50'
 ];
 

@@ -15,10 +15,16 @@ export type SearchResultItem = {
     username: string;
 }
 
+export type ApiSearchResult = {
+    response: SearchResultItem[];
+    dirs: string[];
+}
+
 export type SearchResultSessionItem = {
     item: SearchResultItem;
     meta: {
-        badges: string[]
+        badges: string[];
+        dirs: string[];
     },
     session?: Session['arguments']['torrents'][number];
 }

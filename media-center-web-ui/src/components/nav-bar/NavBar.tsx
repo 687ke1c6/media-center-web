@@ -14,8 +14,8 @@ type Props = {
 const NavBar = (props: ParentProps<Props>) => {
     const [menuToggle, setMenuToggle] = createSignal(false);
     return (
-        <nav class="flex flex-col md:items-center md:flex-row  p-6 relative">
-            <Link classNames="flex items-center text-white" to="/">
+        <nav class="flex flex-col md:items-center md:flex-row p-6 relative">
+            <Link classNames="flex items-center dark:text-white" to="/">
                 <JellyfinIcon width={30} />
                 <span class="font-semibold text-xl tracking-tight uppercase ms-2">{props.appName}</span>
             </Link>
@@ -26,7 +26,7 @@ const NavBar = (props: ParentProps<Props>) => {
             <div class="md:ml-6 md:flex-grow items-center w-auto md:block text-sm" classList={{ 'hidden': !menuToggle() }}>
                 <For each={props.links}>
                     {(item, _index) =>
-                        <Link classNames="md:inline-block block mt-2 md:mt-0 text-teal-200 hover:text-white mr-4" to={item.path}>
+                        <Link classNames="md:inline-block block mt-2 md:mt-0 text-teal-700 hover:text-teal-500 dark:text-teal-200 dark:hover:text-white mr-4" to={item.path}>
                             {item.title}
                         </Link>}
                 </For>
