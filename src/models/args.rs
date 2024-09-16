@@ -13,9 +13,13 @@ pub struct Args {
     #[arg(long, default_value="127.0.0.1", env)]
     pub transmission_ipv4: String,
 
-    /// Torrent Socks5 Proxy
-    #[arg(long, default_value="127.0.0.1:9050", env)]
-    pub tor_proxy_addr: String,
+    /// Torrent Socks5 Proxy Port
+    #[arg(long, short('p'), default_value_t=9050, env)]
+    pub tor_port: u16,
+
+    /// Torrent Socks5 Proxy IPV4
+    #[arg(long, default_value="127.0.0.1", env)]
+    pub tor_ipv4: String,
 
     /// Media Library Path
     #[arg(short, long, default_value="/media", env)]

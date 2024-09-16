@@ -75,7 +75,7 @@ async fn search(State(args): State<Args>, Json(json): Json<serde_json::Value>) -
             return StatusCode::INTERNAL_SERVER_ERROR.into_response();
         }
     } else {
-        let proxy = reqwest::Proxy::all(format!("socks5h://{}", &args.tor_proxy_addr)).unwrap();
+        let proxy = reqwest::Proxy::all(format!("socks5h://{}:{}",&args.tor_ipv4, &args.tor_port)).unwrap();
         let http_client = reqwest::Client::builder().proxy(proxy).build().unwrap();
         println!("GET: {}", url);
         let response_result = http_client.get(url).send().await;
@@ -159,7 +159,6 @@ async fn torrent_add(State(args): State<Args>, Json(json): Json<serde_json::Valu
 
     let download_dir = Path::new(&args.media_library)
         .join(folder)
-        .to_owned()
         .to_str()
         .unwrap()
         .to_owned();
