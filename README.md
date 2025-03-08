@@ -24,7 +24,8 @@ $ ./do debug
 
 If you have tor running on your host, find your host ip on the docker network and run
 ```bash
-$ export TOR_PROXY_ADDR=<docker host ip>:9051
+$ export TOR_PORT=9051
+$ export TOR_IPV4=<docker host ip>
 ```
 ...then from your host run:
 ```bash
@@ -35,6 +36,6 @@ $ ncat -l -k -p 9051 -c "ncat 127.0.0.1 9050"
 
 ```bash
 $ export MEDIA_LIBRARY=/workspaces/media-center-web/media
-$ export DEBUG_SEARCH_RESPONSE=true         # or set up tor locally on port 9050
+$ export DEBUG_SEARCH_RESPONSE=/workspaces/media-center-web/sample-data/familyguy.json         # or set up tor locally on port 9050
 $ export http_proxy=127.0.0.1:8080
 ```

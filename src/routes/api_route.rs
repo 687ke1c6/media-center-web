@@ -62,16 +62,17 @@ async fn search(State(args): State<Args>, Json(json): Json<serde_json::Value>) -
     let mut map: serde_json::Map<String, Value> = serde_json::Map::new();
 
     if let Some(debug_search_response) = &args.debug_search_response {
+        println!("DEBUG_SEARCH_RESPONSE: Attempting json from {}", &debug_search_response);
         let mut json_contents = String::new();
         let size = fs::File::open(&debug_search_response)
             .and_then(|mut f| f.read_to_string(&mut json_contents))
             .ok();
-        if let Some(_) = size {
-            let v: Value = serde_json::from_str(&json_contents).unwrap();
-            let mut map: serde_json::Map<String, Value> = serde_json::Map::new();
-            map.insert("response".to_string(), v);
+        if let Some(sz) = size {
+            let debug_json_resonse: Value = serde_json::from_str(&json_contents).unwrap();
+            map.insert("response".to_string(), debug_json_resonse);
+            println!("DEBUG_SEARCH_RESPONSE: Found json file. {} bytes", sz);
         } else {
-            println!("Could not open file: {}", &debug_search_response);
+            println!("DEBUG_SEARCH_RESPONSE: Could not open file: {}", &debug_search_response);
             return StatusCode::INTERNAL_SERVER_ERROR.into_response();
         }
     } else {
@@ -106,9 +107,7 @@ async fn torrent_info(State(args): State<Args>) -> Response {
 }
 
 async fn torrent_get(State(args): State<Args>) -> Response {
-    println!("GET: /api/torrent-get");
     let transmission_url = format!("http://{}:9091/transmission/rpc", &args.transmission_ipv4);
-    println!("{}", transmission_url);
     let mut client = TransClient::new(transmission_url.parse().unwrap());
 
     let get_result = client.torrent_get(None, None).await;
