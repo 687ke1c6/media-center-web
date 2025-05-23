@@ -28,13 +28,13 @@ const SearchView = () => {
             item: searchResult,
             meta: {
               badges: Object.entries({
-                h264: searchResult.name.toLowerCase().includes('h264'),
-                x264: searchResult.name.toLowerCase().includes('x264'),
-                x265: searchResult.name.toLowerCase().includes('x265'),
-                h265: searchResult.name.toLowerCase().includes('h265'),
-                hvec: searchResult.name.toLowerCase().includes('hvec'),
-                p1080: searchResult.name.toLowerCase().includes('1080p'),
-                p720: searchResult.name.toLowerCase().includes('720p')
+                h264: searchResult.title.toLowerCase().includes('h264'),
+                x264: searchResult.title.toLowerCase().includes('x264'),
+                x265: searchResult.title.toLowerCase().includes('x265'),
+                h265: searchResult.title.toLowerCase().includes('h265'),
+                hvec: searchResult.title.toLowerCase().includes('hvec'),
+                p1080: searchResult.title.toLowerCase().includes('1080p'),
+                p720: searchResult.title.toLowerCase().includes('720p')
               }).filter(([, include]) => include)
                 .map(([key]) => key),
               dirs: searchResults.dirs
@@ -60,10 +60,10 @@ const SearchView = () => {
     const disposable = torrentsObservable.subscribe(session => {
       session.arguments.torrents.forEach(torrent => {
         setResults(
-          result => torrent.hashString.toLowerCase() === result.item.info_hash.toLowerCase(),
+          result => torrent.hashString.toLowerCase() === result.item.infoHash.toLowerCase(),
           searchItem => ({
             ...searchItem,
-            session: session.arguments.torrents.find(t => t.hashString.toLowerCase() === searchItem.item.info_hash.toLowerCase())
+            session: session.arguments.torrents.find(t => t.hashString.toLowerCase() === searchItem.item.infoHash.toLowerCase())
           }));
       });
     })

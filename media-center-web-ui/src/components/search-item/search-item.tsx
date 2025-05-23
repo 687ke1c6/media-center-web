@@ -15,7 +15,7 @@ const SearchItem = (props: ParentProps<Props>) => {
     return <>
         <div class="md:flex relative border-gray-700 cursor-pointer items-center justify-between" onclick={() => props.onClicked(props.searchItem)}>
             <div class="md:flex items-center">
-                <div class="truncate">{props.searchItem.item.name}</div>
+                <div class="truncate">{props.searchItem.item.title}</div>
                 <div class="text-xs text-gray-400 md:ms-2">
                     <span class="">[{props.searchItem.item.seeders} | {props.searchItem.item.leechers}]</span>
                     <span class="ms-2">{Math.floor(parseInt(props.searchItem.item.size, 10) / 1024 / 1024 / 1024 * 100) / 100}Gb</span>

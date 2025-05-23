@@ -5,9 +5,9 @@ export type SearchResultItem = {
     category: string;
     id: string;
     imdb: string;
-    info_hash: string;
+    infoHash: string;
     leechers: string;
-    name: string;
+    title: string;
     num_files: string;
     seeders: string;
     size: string;

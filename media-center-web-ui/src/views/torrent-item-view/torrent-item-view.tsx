@@ -43,12 +43,12 @@ const TorrentItemView = (props: ParentProps<Props>) => {
 
     return <>
         {props.searchItem &&
-            <form class="m-4 rounded"
+            <form class="m-4 rounded overflow-x-auto shadow-lg gap-2"
                 ref={clickOutsideBehaviour(() => props.onClose?.())}
                 onsubmit={onSubmit}>
                 <For each={Object.entries(props.searchItem.item ?? {}).map(([key, value]) => ({ key, value: itemConfiguration[key]?.(value) ?? value }))}>
                     {(item) =>
-                        <div class="text-sm">
+                        <div class="text-sm flex gap-1">
                             <label for={`val-${item.key}`} class="text-gray-500">{`${_.capitalize(item.key)}:`}</label>
                             <div id={`val-${item.key}`} class="truncate">{item.value}</div>
                         </div>}
