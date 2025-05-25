@@ -5,13 +5,14 @@ use clap::Parser;
 #[command(version, about, long_about = None)]
 #[derive(Clone)]
 pub struct Args {
-    /// Torrent Api Url
-    #[arg(short, long, default_value="some_url", env)]
-    pub torrent_api_url: String,
 
     /// Transmission IP Address
-    #[arg(long, default_value="127.0.0.1", env)]
+    #[arg(long, env)]
     pub transmission_ipv4: String,
+
+    /// Transmission Port
+    #[arg(long, default_value_t=9091, env)]
+    pub transmission_port: u16,
 
     /// Torrent Socks5 Proxy Port
     #[arg(long, short('p'), default_value_t=9050, env)]
@@ -25,15 +26,23 @@ pub struct Args {
     #[arg(short, long, default_value="/media", env)]
     pub media_library: String,
 
-    /// Debug Search Response - Path to Json file as response
-    #[arg(short, long, env)]
-    pub debug_search_response: Option<String>,
-
     /// Download speed limit kbps
     #[arg(short('s'), long, env)]
     pub speed_limit_down: Option<i32>,
     
     /// Script to run after torrent has complete
     #[arg(short('f'), long, env)]
-    pub script_torrent_done_filename: Option<String>
+    pub script_torrent_done_filename: Option<String>,
+
+    /// Prowlarr IPv4 Address
+    #[arg(short('r'), long, env)]
+    pub prowlarr_ipv4: String,
+
+    /// Prowlarr Port
+    #[arg(long, default_value_t=9696, env)]
+    pub prowlarr_port: u16,
+
+    /// Prowlarr config path
+    #[arg(long, default_value="/config/prowlarr", env)]
+    pub prowlarr_config_path: String,
 }

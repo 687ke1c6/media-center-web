@@ -1,6 +1,5 @@
 use std::{
     fs::{self, FileType},
-    io::Read,
     path::Path,
 };
 
@@ -53,63 +52,43 @@ async fn search(State(state): State<AxumState>, Json(json): Json<serde_json::Val
         })
         .collect::<Vec<String>>();
 
-    let url: String = format!(
+    let prowlarr_url: String = format!(
         "{}/api/v1/search?query={}",
-        &state.args.torrent_api_url,
+        format!(
+            "http://{}:{}",
+            &state.args.prowlarr_ipv4,
+            &state.args.prowlarr_port
+        ),
         url_escape::encode_component(json["search_term"].as_str().unwrap())
     );
 
     let mut map: serde_json::Map<String, Value> = serde_json::Map::new();
 
-    if let Some(debug_search_response) = &state.args.debug_search_response {
-        println!(
-            "DEBUG_SEARCH_RESPONSE: Attempting json from {}",
-            &debug_search_response
-        );
-        let mut json_contents = String::new();
-        let size = fs::File::open(&debug_search_response)
-            .and_then(|mut f| f.read_to_string(&mut json_contents))
-            .ok();
-        if let Some(sz) = size {
-            let debug_json_resonse: Value = serde_json::from_str(&json_contents).unwrap();
-            map.insert("response".to_string(), debug_json_resonse);
-            println!("DEBUG_SEARCH_RESPONSE: Found json file. {} bytes", sz);
-        } else {
-            println!(
-                "DEBUG_SEARCH_RESPONSE: Could not open file: {}",
-                &debug_search_response
+    let http_client = reqwest::Client::builder()
+        .default_headers({
+            let mut headers = reqwest::header::HeaderMap::new();
+            headers.insert(
+                "X-Api-Key",
+                state.prowlarr_config.api_key.clone().parse().unwrap(),
             );
-            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-        }
-    } else {
-        // let proxy = reqwest::Proxy::all(format!("socks5h://{}:{}",&args.tor_ipv4, &args.tor_port)).unwrap();
-        let http_client = reqwest::Client::builder()
-            // .proxy(proxy)
-            .default_headers({
-                let mut headers = reqwest::header::HeaderMap::new();
-                headers.insert(
-                    "X-Api-Key",
-                    state.prowlarr_config.api_key.clone().parse().unwrap(),
-                );
-                headers
-            })
-            .build()
-            .unwrap();
-        
-        println!("GET: {}", url);
-        let response_result = http_client.get(url).send().await;
+            headers
+        })
+        .build()
+        .unwrap();
 
-        match response_result {
-            Ok(response) => {
-                let text = response.json::<serde_json::Value>().await;
-                if let Ok(json) = text {
-                    map.insert("response".to_string(), json);
-                }
+    println!("GET: {}", prowlarr_url);
+    let response_result = http_client.get(prowlarr_url).send().await;
+
+    match response_result {
+        Ok(response) => {
+            let text = response.json::<serde_json::Value>().await;
+            if let Ok(json) = text {
+                map.insert("response".to_string(), json);
             }
-            Err(err) => {
-                println!("{:?}", err);
-                return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-            }
+        }
+        Err(err) => {
+            println!("{:?}", err);
+            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
         }
     }
 
@@ -120,8 +99,9 @@ async fn search(State(state): State<AxumState>, Json(json): Json<serde_json::Val
 async fn torrent_info(State(state): State<AxumState>) -> Response {
     println!("POST: /api/torrent-info");
     let transmission_url = format!(
-        "http://{}:9091/transmission/rpc",
-        &state.args.transmission_ipv4
+        "http://{}:{}/transmission/rpc",
+        &state.args.transmission_ipv4,
+        &state.args.transmission_port
     );
     let mut _client = TransClient::new(transmission_url.parse().unwrap());
     StatusCode::OK.into_response()
@@ -129,8 +109,9 @@ async fn torrent_info(State(state): State<AxumState>) -> Response {
 
 async fn torrent_get(State(state): State<AxumState>) -> Response {
     let transmission_url = format!(
-        "http://{}:9091/transmission/rpc",
-        &state.args.transmission_ipv4
+        "http://{}:{}/transmission/rpc",
+        &state.args.transmission_ipv4,
+        &state.args.transmission_port
     );
     let mut client = TransClient::new(transmission_url.parse().unwrap());
     let fields = vec![
@@ -148,7 +129,7 @@ async fn torrent_get(State(state): State<AxumState>) -> Response {
         TorrentGetField::Files,
         TorrentGetField::SizeWhenDone,
         TorrentGetField::HashString,
-        TorrentGetField::Eta
+        TorrentGetField::Eta,
     ];
 
     let get_result = client.torrent_get(Some(fields), None).await;
@@ -176,8 +157,9 @@ async fn torrent_remove(
             .map(|v| Id::Id(v.as_i64().unwrap()))
             .collect();
         let transmission_url = format!(
-            "http://{}:9091/transmission/rpc",
-            &state.args.transmission_ipv4
+            "http://{}:{}/transmission/rpc",
+            &state.args.transmission_ipv4,
+            &state.args.transmission_port
         );
         let mut client = TransClient::new(transmission_url.parse().unwrap());
         let remove_response = client
@@ -199,8 +181,9 @@ async fn torrent_add(
 ) -> Response {
     println!("POST: /api/torrent-add");
     let transmission_url = format!(
-        "http://{}:9091/transmission/rpc",
-        &state.args.transmission_ipv4
+        "http://{}:{}/transmission/rpc",
+        &state.args.transmission_ipv4,
+        &state.args.transmission_port
     );
     let mut client = TransClient::new(transmission_url.parse().unwrap());
 
@@ -214,12 +197,8 @@ async fn torrent_add(
         .to_str()
         .unwrap()
         .to_owned();
-    println!("downloadDir: {}", download_dir);    
+    println!("downloadDir: {}", download_dir);
 
-    // let magnet_url = format!(
-    //     "magnet:?xt=urn:btih:{}",
-    //     &json["info_hash"].as_str().unwrap()
-    // );
     let magnet_url = json["guid"].as_str().unwrap().to_owned();
     println!("magnetUrl: {}", magnet_url);
 
