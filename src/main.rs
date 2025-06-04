@@ -18,6 +18,7 @@ mod routes;
 use routes::api_route::api_route;
 use std::fs;
 mod libs;
+use std::{path::Path};
 mod models;
 use tokio::sync::broadcast;
 use anyhow::Result;
@@ -36,10 +37,21 @@ async fn main() -> Result<()> {
     println!("Media Center Web");
     dbg!(&args);
 
-    let prowlarr_config_path = format!(
-        "{}{}{}",
-        &args.media_library, &args.prowlarr_config_path, "/config.xml"
-    );
+    let prowlarr_config_path_pathbuf = Path::new(&args.media_library)
+        .join(std::env::var("PROWLARR_CONFIG_PATH").unwrap_or("/config/prowlarr".to_string()))
+        .join("config.xml")
+        .canonicalize().expect("Failed to canonicalize prowlarr_config_path");
+    
+    prowlarr_config_path_pathbuf.exists()
+        .then(|| println!("Found Prowlarr config: {}", prowlarr_config_path_pathbuf.display()))
+        .unwrap_or_else(|| panic!("Prowlarr config path does not exist: {}", prowlarr_config_path_pathbuf.display()));
+
+    let prowlarr_config_path = prowlarr_config_path_pathbuf
+        .to_str()
+        .ok_or("Failed to convert prowlarr_config_path to string")
+        .unwrap_or_else(|e|e.into())
+        .to_string();
+    
     let xml_content = fs::read_to_string(&prowlarr_config_path)
         .expect(format!("Could not read config file: {}", prowlarr_config_path).as_str());
 
