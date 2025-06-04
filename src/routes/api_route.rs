@@ -2,8 +2,10 @@ use std::{
     fs::{self, FileType},
     path::Path,
 };
-
-use crate::models::{axum_state::AxumState, rpc::RpcResponseProxy};
+use crate::{
+    models::{axum_state::AxumState, rpc::RpcResponseProxy},
+    libs::transmission,
+};
 use axum::{
     extract::State,
     http::StatusCode,
@@ -12,9 +14,9 @@ use axum::{
     Json, Router,
 };
 use reqwest::{Client, RequestBuilder};
-use serde_json::{json, Value};
+use serde_json::Value;
 use transmission_rpc::{
-    types::{Id, SessionSetArgs, TorrentAddArgs, TorrentGetField},
+    types::{Id, SessionSetArgs, TorrentAddArgs},
     TransClient,
 };
 
@@ -108,38 +110,15 @@ async fn torrent_info(State(state): State<AxumState>) -> Response {
 }
 
 async fn torrent_get(State(state): State<AxumState>) -> Response {
-    let transmission_url = format!(
-        "http://{}:{}/transmission/rpc",
-        &state.args.transmission_ipv4,
-        &state.args.transmission_port
-    );
-    let mut client = TransClient::new(transmission_url.parse().unwrap());
-    let fields = vec![
-        TorrentGetField::Id,
-        TorrentGetField::Name,
-        TorrentGetField::Status,
-        TorrentGetField::PercentDone,
-        TorrentGetField::TotalSize,
-        TorrentGetField::LeftUntilDone,
-        TorrentGetField::RateDownload,
-        TorrentGetField::RateUpload,
-        TorrentGetField::PeersConnected,
-        TorrentGetField::PeersGettingFromUs,
-        TorrentGetField::PeersSendingToUs,
-        TorrentGetField::Files,
-        TorrentGetField::SizeWhenDone,
-        TorrentGetField::HashString,
-        TorrentGetField::Eta,
-    ];
 
-    let get_result = client.torrent_get(Some(fields), None).await;
-    match get_result {
+    match transmission::torrent_get(&state).await {
         Ok(response) => {
-            let proxy = RpcResponseProxy::from_original(&response);
-            let js = json!(proxy);
-            return Json(js).into_response();
+            return Json(RpcResponseProxy::from_original(&response)).into_response();
         }
-        Err(err) => println!("torrent_get(): {}", err),
+        Err(err) => {
+            println!("Error: torrent-get");
+            println!("{:?}", err);
+        }
     }
 
     StatusCode::INTERNAL_SERVER_ERROR.into_response()

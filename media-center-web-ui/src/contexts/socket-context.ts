@@ -1,6 +1,8 @@
 import { interval, from, switchMap, shareReplay, startWith, retry } from "rxjs";
+import { WebSocketSubject } from 'rxjs/webSocket';
 import { createContext } from "solid-js";
 import { postTorrentGet } from "../services/api-service";
+import { Session } from "../models/session.model";
 
 const torrentsObservable = interval(4000)
     .pipe(
@@ -10,8 +12,12 @@ const torrentsObservable = interval(4000)
         retry({ delay: 10000 })
     )
 
+const webSocket = new WebSocketSubject<Session>('/ws');
+const ws = webSocket.pipe(retry({ delay: 1000 }))
+
 const SocketContext = createContext({
-    torrentsObservable
+    torrentsObservable,
+    webSocket
 });
 
 export default SocketContext;
