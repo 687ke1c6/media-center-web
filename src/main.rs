@@ -16,12 +16,12 @@ use tower_http::services::ServeDir;
 
 mod routes;
 use routes::api_route::api_route;
-use std::fs;
+use std::{fs, path::PathBuf};
 mod libs;
-use std::{path::Path};
+use std::path::Path;
 mod models;
-use tokio::sync::broadcast;
 use anyhow::Result;
+use tokio::sync::broadcast;
 
 #[cfg(debug_assertions)]
 const PATH_TO_CONFIG: &'static str = "./media-center-web-ui/dist";
@@ -39,23 +39,22 @@ async fn main() -> Result<()> {
 
     println!("Media Library Path: {}", args.media_library);
 
-    let prowlarr_config_path_pathbuf = Path::new(&args.media_library)
-        .join(&args.prowlarr_config_path)
-        .canonicalize()
-        .expect("Failed to canonicalize prowlarr_config_path");
-    
-    prowlarr_config_path_pathbuf.exists()
+    let prowlarr_config_path_pathbuf = Path::new(&args.prowlarr_config_path)
+        .is_absolute()
+        .then(|| PathBuf::new().join(&args.prowlarr_config_path).components().as_path().to_path_buf())
+        .unwrap_or_else(|| {
+            Path::new(&args.media_library)
+            .components().as_path()
+            .join(&args.prowlarr_config_path)
+        });
+
+    prowlarr_config_path_pathbuf
+        .exists()
         .then(|| println!("Found Prowlarr config: {}", prowlarr_config_path_pathbuf.display()))
         .unwrap_or_else(|| panic!("Prowlarr config path does not exist: {}", prowlarr_config_path_pathbuf.display()));
 
-    let prowlarr_config_path = prowlarr_config_path_pathbuf
-        .to_str()
-        .ok_or("Failed to convert prowlarr_config_path to string")
-        .unwrap_or_else(|e|e.into())
-        .to_string();
-    
-    let xml_content = fs::read_to_string(&prowlarr_config_path)
-        .expect(format!("Could not read config file: {}", prowlarr_config_path).as_str());
+    let xml_content = fs::read_to_string(&prowlarr_config_path_pathbuf)
+        .expect(format!("Could not read config file: {}", prowlarr_config_path_pathbuf.display()).as_str());
 
     let config = ProwlarrConfig::from_string(&xml_content)?;
     let (tx, _rx) = broadcast::channel(100);
@@ -93,7 +92,6 @@ async fn main() -> Result<()> {
         .nest("/api", api_route(state.clone()))
         .fallback_service(ServeDir::new(PATH_TO_CONFIG));
 
-    // run our app with hyper, listening globally on port 3000
     let listener = TcpListener::bind("0.0.0.0:3000").await?;
     axum::serve(listener, app).await?;
     Ok(())
