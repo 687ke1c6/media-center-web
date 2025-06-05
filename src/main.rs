@@ -37,10 +37,12 @@ async fn main() -> Result<()> {
     println!("Media Center Web");
     dbg!(&args);
 
+    println!("Media Library Path: {}", args.media_library);
+
     let prowlarr_config_path_pathbuf = Path::new(&args.media_library)
-        .join(std::env::var("PROWLARR_CONFIG_PATH").unwrap_or("/config/prowlarr".to_string()))
-        .join("config.xml")
-        .canonicalize().expect("Failed to canonicalize prowlarr_config_path");
+        .join(&args.prowlarr_config_path)
+        .canonicalize()
+        .expect("Failed to canonicalize prowlarr_config_path");
     
     prowlarr_config_path_pathbuf.exists()
         .then(|| println!("Found Prowlarr config: {}", prowlarr_config_path_pathbuf.display()))

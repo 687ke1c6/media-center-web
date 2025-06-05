@@ -43,6 +43,6 @@ pub struct Args {
     pub prowlarr_port: u16,
 
     /// Prowlarr config path
-    #[arg(long, default_value="/config/prowlarr", env)]
+    #[arg(long, default_value="config/prowlarr/config.xml", env)]
     pub prowlarr_config_path: String,
 }
