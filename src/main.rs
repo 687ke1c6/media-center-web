@@ -16,7 +16,7 @@ use tower_http::services::ServeDir;
 
 mod routes;
 use routes::api_route::api_route;
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, sync::Arc};
 mod libs;
 use std::path::Path;
 mod models;
@@ -60,7 +60,7 @@ async fn main() -> Result<()> {
     let (tx, _rx) = broadcast::channel(100);
     let cloned_tx = tx.clone();
 
-    let state = AxumState::new(args, config);
+    let state = Arc::new(AxumState::new(args, config));
 
     let cloned_state = state.clone();
     tokio::spawn(async move {

@@ -8,6 +8,7 @@ pub async fn torrent_get(state: &AxumState) -> Result<RpcResponse<Torrents<Torre
         "http://{}:{}/transmission/rpc",
         &state.args.transmission_ipv4, &state.args.transmission_port
     );
+    dbg!(&transmission_url);
     let mut client = TransClient::new(transmission_url.parse().unwrap());
     let fields = vec![
         TorrentGetField::Id,

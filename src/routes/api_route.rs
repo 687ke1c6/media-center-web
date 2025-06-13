@@ -1,6 +1,6 @@
 use std::{
     fs::{self, FileType},
-    path::Path,
+    path::Path, sync::Arc,
 };
 use crate::{
     models::{axum_state::AxumState, rpc::RpcResponseProxy},
@@ -20,7 +20,7 @@ use transmission_rpc::{
     TransClient,
 };
 
-pub fn api_route(state: AxumState) -> Router {
+pub fn api_route(state: Arc<AxumState>) -> Router {
     Router::new()
         .route("/search", post(search))
         .route("/remote", post(remote))
@@ -36,7 +36,7 @@ pub fn to_rpc_reqwest(url: String, client: &Client) -> RequestBuilder {
     request
 }
 
-async fn search(State(state): State<AxumState>, Json(json): Json<serde_json::Value>) -> Response {
+async fn search(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json::Value>) -> Response {
     let dirs = fs::read_dir(&state.args.media_library)
         .unwrap()
         .filter_map(|entity| {
@@ -98,7 +98,7 @@ async fn search(State(state): State<AxumState>, Json(json): Json<serde_json::Val
     return Json(map).into_response();
 }
 
-async fn torrent_info(State(state): State<AxumState>) -> Response {
+async fn torrent_info(State(state): State<Arc<AxumState>>) -> Response {
     println!("POST: /api/torrent-info");
     let transmission_url = format!(
         "http://{}:{}/transmission/rpc",
@@ -109,7 +109,7 @@ async fn torrent_info(State(state): State<AxumState>) -> Response {
     StatusCode::OK.into_response()
 }
 
-async fn torrent_get(State(state): State<AxumState>) -> Response {
+async fn torrent_get(State(state): State<Arc<AxumState>>) -> Response {
 
     match transmission::torrent_get(&state).await {
         Ok(response) => {
@@ -125,7 +125,7 @@ async fn torrent_get(State(state): State<AxumState>) -> Response {
 }
 
 async fn torrent_remove(
-    State(state): State<AxumState>,
+    State(state): State<Arc<AxumState>>,
     Json(json): Json<serde_json::Value>,
 ) -> Response {
     println!("POST: /api/torrent-remove");
@@ -155,7 +155,7 @@ async fn torrent_remove(
 }
 
 async fn torrent_add(
-    State(state): State<AxumState>,
+    State(state): State<Arc<AxumState>>,
     Json(json): Json<serde_json::Value>,
 ) -> Response {
     println!("POST: /api/torrent-add");
