@@ -14,8 +14,15 @@ pub struct RpcResponseProxyArguments {
     torrents: Vec<HashMap<String, String>>
 }
 
+impl From<&RpcResponse<Torrents<Torrent>>> for RpcResponseProxy {
+    fn from(rpc_response: &RpcResponse<Torrents<Torrent>>) -> Self {
+        RpcResponseProxy::from_original(rpc_response)
+    }
+}
+
+
 impl RpcResponseProxy {
-    pub fn from_original(rpc_response: &RpcResponse<Torrents<Torrent>>) -> RpcResponseProxy {
+    fn from_original(rpc_response: &RpcResponse<Torrents<Torrent>>) -> RpcResponseProxy {
         RpcResponseProxy {
             result: rpc_response.result.to_owned(),
             arguments: RpcResponseProxyArguments {

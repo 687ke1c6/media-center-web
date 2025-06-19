@@ -1,12 +1,12 @@
 use transmission_rpc::{types::{RpcResponse, Torrent, TorrentGetField, Torrents}, TransClient};
 use anyhow::Result;
 
-use crate::models::{axum_state::AxumState};
+use crate::models::{args::Args};
 
-pub async fn torrent_get(state: &AxumState) -> Result<RpcResponse<Torrents<Torrent>>> {
+pub async fn torrent_get(state: &Args) -> Result<RpcResponse<Torrents<Torrent>>> {
     let transmission_url = format!(
         "http://{}:{}/transmission/rpc",
-        &state.args.transmission_ipv4, &state.args.transmission_port
+        &state.transmission_ipv4, &state.transmission_port
     );
     let mut client = TransClient::new(transmission_url.parse().unwrap());
     let fields = vec![

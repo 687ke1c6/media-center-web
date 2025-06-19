@@ -2,26 +2,26 @@ import _ from 'lodash';
 import { For, Match, Switch, onCleanup, onMount, useContext } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { Session, Torrent } from "../../models/session.model";
-import SocketContext from "../../contexts/socket-context";
 import DownloadItem from "../../components/download-item/download-item";
 import { spaceY } from '../../utils/tailwind.utils';
 import { postTorrentInfo } from '../../services/api-service';
+import { SocketContext } from '../../contexts/socket-context';
 
 const DownloadsView = () => {
     const [torrents, setTorrents] = createStore<Session['arguments']>({ torrents: [] });
-    const socketContext = useContext(SocketContext);
+    const { webSocket } = useContext(SocketContext);
 
     onMount(() => {
-        const sub = socketContext.torrentsObservable.subscribe(session => 
+        const sub = webSocket.subscribe(session =>
             setTorrents('torrents', reconcile(session.arguments.torrents)));
         onCleanup(() => sub.unsubscribe());
     });
 
     const onTorrentClick = (torrent: Torrent) => {
-        postTorrentInfo({id: torrent.id})
-        .then(value => {
-            console.log(value);
-        })
+        postTorrentInfo({ id: torrent.id })
+            .then(value => {
+                console.log(value);
+            })
     }
 
     return <div>
