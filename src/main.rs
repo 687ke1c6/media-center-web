@@ -60,6 +60,7 @@ async fn main() -> Result<()> {
             state.torrent_websocket.clone()
                 .handle_websocket_upgrade(upgrade)
         }))
+        .route("/health", any(|| async { axum::http::StatusCode::OK }))
         .nest("/api", api_route(state.clone()))
         .with_state(state.clone())
         .fallback_service(ServeDir::new(PATH_TO_CONFIG));

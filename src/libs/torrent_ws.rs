@@ -28,7 +28,7 @@ impl TorrentWebSocket {
         let join_handle = tokio::spawn(async move {
             dbg!("Starting TorrentWebSocket loop");
             loop {
-                tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                tokio::time::sleep(tokio::time::Duration::from_secs(args.torrent_refresh_secs.into())).await;
                 if tx_clone.receiver_count() == 1 {
                     continue;
                 }
