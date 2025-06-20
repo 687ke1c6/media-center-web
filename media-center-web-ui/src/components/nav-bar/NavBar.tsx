@@ -1,7 +1,8 @@
 import Link from '../link/Link';
-import { For, ParentProps, createSignal } from 'solid-js';
+import { For, ParentProps, createEffect, createSignal } from 'solid-js';
 import JellyfinIcon from '../ux/jellyfin-icon.tsx/jellyfin-icon';
 import { MenuIcon } from '../ux/menu-icon/menu-icon';
+import { getIpInfo } from '../../services/api-service';
 
 type Props = {
     appName: string;
@@ -13,12 +14,33 @@ type Props = {
 
 const NavBar = (props: ParentProps<Props>) => {
     const [menuToggle, setMenuToggle] = createSignal(false);
+    const [ipInfo, setIpInfo] = createSignal<Awaited<ReturnType<typeof getIpInfo>> | null>(null);
+    createEffect(() => {
+        getIpInfo().then((data) => {
+            setIpInfo(data);
+        }).catch((error) => {
+            console.error('Error fetching IP info:', error);
+        });
+    })
     return (
         <nav class="flex flex-col md:items-center md:flex-row p-6 relative">
-            <Link classNames="flex items-center dark:text-white" to="/">
-                <JellyfinIcon width={30} />
-                <span class="font-semibold text-xl tracking-tight uppercase ms-2">{props.appName}</span>
-            </Link>
+            <div>
+                <Link classNames="flex items-center dark:text-white" to="/">
+                    <JellyfinIcon width={30} />
+                    <span class="font-semibold text-xl tracking-tight uppercase ms-2">{props.appName}</span>
+                </Link>
+            </div>
+
+            {ipInfo() &&
+                <a href={`https://ipinfo.io/${ipInfo()!.ip}`} 
+                    target="_blank" 
+                    class="md:absolute mt-2 md:mt-0 md:right-4 text-xs items-center w-auto text-sm text-gray-500 dark:text-gray-400">
+                    <span >
+                        <span>{ipInfo()!.city}, </span>
+                        <span>({ipInfo()!.country})</span>
+                        <span class="md:hidden"> - [ {ipInfo()!.ip} ]</span>
+                    </span>
+                </a>}
 
             <button class="md:hidden absolute mt-1 right-4" onClick={() => setMenuToggle(!menuToggle())}>
                 <MenuIcon width={'1.5rem'} height={'1.5rem'} />

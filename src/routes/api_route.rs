@@ -10,7 +10,7 @@ use axum::{
     extract::State,
     http::StatusCode,
     response::{IntoResponse, Response},
-    routing::post,
+    routing::{get, post},
     Json, Router,
 };
 use reqwest::{Client, RequestBuilder};
@@ -23,6 +23,7 @@ use transmission_rpc::{
 pub fn api_route(state: Arc<AxumState>) -> Router<Arc<AxumState>> {
     Router::new()
         .route("/search", post(search))
+        .route("/ipinfo", get(ipinfo))
         .route("/remote", post(remote))
         .route("/torrent-remove", post(torrent_remove))
         .route("/torrent-get", post(torrent_get))
@@ -34,6 +35,27 @@ pub fn api_route(state: Arc<AxumState>) -> Router<Arc<AxumState>> {
 pub fn to_rpc_reqwest(url: String, client: &Client) -> RequestBuilder {
     let request = client.post(url);
     request
+}
+
+async fn ipinfo() -> Response {
+    let ipinfo_url = "http://ipinfo.io".to_string();
+    let http_client = reqwest::Client::builder().build().unwrap();
+    let response_result = http_client.get(ipinfo_url).send().await;
+
+    match response_result {
+        Ok(response) => {
+            let text = response.json::<serde_json::Value>().await;
+            if let Ok(json) = text {
+                return Json(json).into_response();
+            }
+        }
+        Err(err) => {
+            println!("{:?}", err);
+            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        }
+    }
+
+    StatusCode::INTERNAL_SERVER_ERROR.into_response()
 }
 
 async fn search(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json::Value>) -> Response {
