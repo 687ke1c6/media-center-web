@@ -1,6 +1,6 @@
 import Link from '../link/Link';
 import { For, ParentProps, createEffect, createSignal } from 'solid-js';
-import JellyfinIcon from '../ux/jellyfin-icon.tsx/jellyfin-icon';
+import JellyfinIcon from '../ux/jellyfin-icon/jellyfin-icon';
 import { MenuIcon } from '../ux/menu-icon/menu-icon';
 import { getIpInfo } from '../../services/api-service';
 
@@ -23,7 +23,7 @@ const NavBar = (props: ParentProps<Props>) => {
         });
     })
     return (
-        <nav class="flex flex-col md:items-center md:flex-row p-6 relative">
+        <nav class="flex flex-col md:items-center md:flex-row py-6 relative">
             <div>
                 <Link classNames="flex items-center dark:text-white" to="/">
                     <JellyfinIcon width={30} />

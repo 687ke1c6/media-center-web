@@ -12,7 +12,7 @@ import {SocketContext} from "../../contexts/socket-context";
 import SearchItem from "../../components/search-item/search-item";
 
 const SearchView = () => {
-  const { torrentsObservable, webSocket } = useContext(SocketContext);
+  const { webSocket } = useContext(SocketContext);
   const [input, setInput] = createSignal('');
   const [selectedItem, setSelectedItem] = createSignal<SearchResultSessionItem>();
   const [results, setResults] = createStore<SearchResultSessionItem[]>([]);
@@ -57,17 +57,6 @@ const SearchView = () => {
   }
 
   onMount(() => {
-    // const disposable = torrentsObservable.subscribe(session => {
-    //   session.arguments.torrents.forEach(torrent => {
-    //     setResults(
-    //       result => torrent.hashString.toLowerCase() === result.item.infoHash.toLowerCase(),
-    //       searchItem => ({
-    //         ...searchItem,
-    //         session: session.arguments.torrents.find(t => t.hashString.toLowerCase() === searchItem.item.infoHash.toLowerCase())
-    //       }));
-    //   });
-    // });
-
     const ws = webSocket.subscribe(session => {
       session.arguments.torrents.forEach(torrent => {
         setResults(
@@ -78,11 +67,7 @@ const SearchView = () => {
           }));
       });
     });
-
-    // webSocket.next('hello there')
-
     onCleanup(() => ws.unsubscribe());
-    // onCleanup(() => disposable.unsubscribe());
   });
 
   const onClicked = async (searchItem: SearchResultSessionItem) => {

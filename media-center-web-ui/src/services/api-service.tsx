@@ -17,7 +17,6 @@ export const postTorrentRemove = (data: {ids: number[], remove: boolean}) =>
 export const postTorrentInfo = (data: {id: string}) =>
     postJson('/api/torrent-info')(data);
 
-
 type IpInfo = {
     ip: string;
     country: string;
@@ -31,3 +30,5 @@ type IpInfo = {
 };
 export const getIpInfo = () =>
     getJson<IpInfo>('/api/ipinfo')
+export const getEnv = () =>
+    getJson<Record<string, string>>('/api/env');

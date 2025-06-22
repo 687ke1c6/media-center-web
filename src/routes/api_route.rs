@@ -22,6 +22,7 @@ use transmission_rpc::{
 
 pub fn api_route(state: Arc<AxumState>) -> Router<Arc<AxumState>> {
     Router::new()
+        .route("/env", get(env))
         .route("/search", post(search))
         .route("/ipinfo", get(ipinfo))
         .route("/remote", post(remote))
@@ -30,6 +31,14 @@ pub fn api_route(state: Arc<AxumState>) -> Router<Arc<AxumState>> {
         .route("/torrent-add", post(torrent_add))
         .route("/torrent-info", post(torrent_info))
         .with_state(state)
+}
+
+async fn env() -> Response {
+    println!("POST: /api/env");
+    let env_vars: serde_json::Map<String, Value> = std::env::vars()
+        .map(|(k, v)| (k, Value::String(v)))
+        .collect();
+    Json(env_vars).into_response()
 }
 
 pub fn to_rpc_reqwest(url: String, client: &Client) -> RequestBuilder {

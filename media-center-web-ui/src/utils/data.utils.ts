@@ -24,7 +24,7 @@ export const toTime = (seconds: string) => {
         return `${(ts / 60 / 60).toFixed()}hr(s)`;
     }
     if (ts > 60) {
-        return `${(ts / 60).toFixed(2)}min(s)`;
+        return `${(ts / 60).toFixed(0)}min(s)`;
     }
     return `${ts}sec(s)`
 }

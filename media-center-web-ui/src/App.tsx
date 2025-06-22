@@ -6,13 +6,18 @@ import { Route, HashRouter } from "@solidjs/router";
 
 const SearchView = lazy(() => import("./views/search-view/search-view"));
 const DownloadsView = lazy(() => import('./views/downloads-view/downloads-view'));
+const UsefulLinksView= lazy(() => import('./views/useful-links-view/useful-links-view'));
 
 const queryClient = new QueryClient();
 
 const Root = (props: ParentProps) =>
     <>
-        <NavBar appName="Downloader" links={[{ title: 'Home', path: '/' }, { title: 'Downloads', path: '/downloads' }]} />
-        <div class="container m-auto">
+        <div class="container m-auto px-4">
+            <NavBar appName="Downloader" links={[
+                    { title: 'Home', path: '/' }, 
+                    { title: 'Downloads', path: '/downloads' }, 
+                    // { title: 'Useful Links', path: '/useful-links' }
+                ]} />
             {props.children}
         </div>
     </>
@@ -34,6 +39,7 @@ const App = () => {
             <HashRouter root={Root}>
                 <Route path='/' component={SearchView} />
                 <Route path={'/downloads'} component={DownloadsView} />
+                <Route path={'/useful-links'} component={UsefulLinksView} />
             </HashRouter>
         </SocketProvider>
     </QueryClientProvider>
