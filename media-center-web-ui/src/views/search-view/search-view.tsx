@@ -37,7 +37,6 @@ const SearchView = () => {
                 p720: searchResult.title.toLowerCase().includes('720p')
               }).filter(([, include]) => include)
                 .map(([key]) => key),
-              dirs: searchResults.dirs
             }
           }))
         )

@@ -56,7 +56,7 @@ const TorrentItemView = (props: ParentProps<Props>) => {
                 <hr class="mt-2 mb-2 opacity-50" />
                 <div class="flex gap-2 justify-end">
                     {!props.searchItem.session && <>
-                        <RollButton type="button" options={props.searchItem.meta.dirs} selectedValue={folder} onSelected={(_, item) => setFolder(item!)} itemRenderer={(i) => i ?? ''}  />
+                        {/* <RollButton type="button" options={props.searchItem.meta.dirs} selectedValue={folder} onSelected={(_, item) => setFolder(item!)} itemRenderer={(i) => i ?? ''}  /> */}
                         <Button type="submit">
                             <div class="flex items-center">
                                 <DownloadIcon />

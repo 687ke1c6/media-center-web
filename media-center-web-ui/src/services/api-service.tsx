@@ -1,20 +1,20 @@
 import { ApiSearchResult, SearchResultItem } from '../models/search.model';
 import { Session } from '../models/session.model';
-import {getJson, postJson, postJsonOnly} from './fetch-service';
+import { getJson, postJson, postJsonOnly } from './fetch-service';
 
 export const postSearch = (searchTerm: string, init: Parameters<(typeof fetch)>[1] = {}) =>
-    postJson<ApiSearchResult>('/api/search', init)({search_term: searchTerm});
+    postJson<ApiSearchResult>('/api/search', init)({ search_term: searchTerm });
 
-export const postTorrentAdd = (data: SearchResultItem & {downloadDir: string}) =>
+export const postTorrentAdd = (data: SearchResultItem & { downloadDir: string }) =>
     postJsonOnly('/api/torrent-add', data);
 
 export const postTorrentGet = () =>
     postJson<Session>('/api/torrent-get')({});
 
-export const postTorrentRemove = (data: {ids: number[], remove: boolean}) =>
+export const postTorrentRemove = (data: { ids: number[], remove: boolean }) =>
     postJsonOnly('/api/torrent-remove', data);
 
-export const postTorrentInfo = (data: {id: string}) =>
+export const postTorrentInfo = (data: { id: string }) =>
     postJson('/api/torrent-info')(data);
 
 type IpInfo = {
@@ -29,6 +29,13 @@ type IpInfo = {
     readme: string; // e.g. "https://ipinfo.io/missingauth
 };
 export const getIpInfo = () =>
-    getJson<IpInfo>('/api/ipinfo')
+    getJson<IpInfo>('/api/ipinfo');
+
 export const getEnv = () =>
     getJson<Record<string, string>>('/api/env');
+
+export const torrentStop = (data: { ids: number[] }) =>
+    postJsonOnly('/api/torrent-stop', data);
+
+export const torrentStart = (data: { ids: number[] }) =>
+    postJsonOnly('/api/torrent-start', data);

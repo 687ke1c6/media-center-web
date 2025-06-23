@@ -3,16 +3,15 @@ use axum::{
 };
 use clap::Parser;
 use models::{
-    args::Args, axum_state::AxumState, prowlarr_config::ProwlarrConfig,
+    args::Args, axum_state::AxumState,
 };
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
 
 mod routes;
 use routes::api_route::api_route;
-use std::{fs, path::PathBuf, sync::Arc};
+use std::sync::Arc;
 mod libs;
-use std::path::Path;
 mod models;
 use anyhow::Result;
 
@@ -34,25 +33,7 @@ async fn main() -> Result<()> {
 
     println!("Media Library Path: {}", args.media_library);
 
-    let prowlarr_config_path_pathbuf = Path::new(&args.prowlarr_config_path)
-        .is_absolute()
-        .then(|| PathBuf::new().join(&args.prowlarr_config_path).components().as_path().to_path_buf())
-        .unwrap_or_else(|| {
-            Path::new(&args.media_library)
-            .components().as_path()
-            .join(&args.prowlarr_config_path)
-        });
-
-    prowlarr_config_path_pathbuf
-        .exists()
-        .then(|| println!("Found Prowlarr config: {}", prowlarr_config_path_pathbuf.display()))
-        .unwrap_or_else(|| panic!("Prowlarr config path does not exist: {}", prowlarr_config_path_pathbuf.display()));
-    
-    let xml_content = fs::read_to_string(&prowlarr_config_path_pathbuf)
-        .expect(format!("Could not read config file: {}", prowlarr_config_path_pathbuf.display()).as_str());
-
-    let config = ProwlarrConfig::from_string(&xml_content)?;
-    let state = Arc::new(AxumState::new(args.clone(), config, TorrentWebSocket::new(args.clone())));
+    let state = Arc::new(AxumState::new(args.clone(), TorrentWebSocket::new(args.clone())));
 
     let app = Router::new()
         .route("/ws", any(async |upgrade: WebSocketUpgrade, State(state): State<Arc<AxumState>>| {

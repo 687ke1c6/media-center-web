@@ -17,14 +17,12 @@ export type SearchResultItem = {
 
 export type ApiSearchResult = {
     response: SearchResultItem[];
-    dirs: string[];
 }
 
 export type SearchResultSessionItem = {
     item: SearchResultItem;
     meta: {
         badges: string[];
-        dirs: string[];
     },
     session?: Session['arguments']['torrents'][number];
 }

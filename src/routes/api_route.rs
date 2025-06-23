@@ -1,5 +1,4 @@
 use std::{
-    fs::{self, FileType},
     path::Path, sync::Arc,
 };
 use crate::{
@@ -29,7 +28,8 @@ pub fn api_route(state: Arc<AxumState>) -> Router<Arc<AxumState>> {
         .route("/torrent-remove", post(torrent_remove))
         .route("/torrent-get", post(torrent_get))
         .route("/torrent-add", post(torrent_add))
-        .route("/torrent-info", post(torrent_info))
+        .route("/torrent-stop", post(torrent_stop))
+        .route("/torrent-start", post(torrent_start))
         .with_state(state)
 }
 
@@ -68,22 +68,6 @@ async fn ipinfo() -> Response {
 }
 
 async fn search(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json::Value>) -> Response {
-    let dirs = fs::read_dir(&state.args.media_library)
-        .unwrap()
-        .filter_map(|entity| {
-            let ee = entity.unwrap();
-            if FileType::is_dir(&ee.file_type().unwrap()) {
-                let dir_name = ee.file_name().to_string_lossy().to_string();
-                if !["incomplete", "logs", "config", "cache"]
-                    .iter()
-                    .any(|&v| v == &dir_name)
-                {
-                    return Some(dir_name);
-                }
-            }
-            None
-        })
-        .collect::<Vec<String>>();
 
     let prowlarr_url: String = format!(
         "{}/api/v1/search?query={}",
@@ -96,7 +80,8 @@ async fn search(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json
     );
 
     let mut map: serde_json::Map<String, Value> = serde_json::Map::new();
-    let api_key = state.prowlarr_config.api_key.clone();
+    let api_key = state.args.prowlarr_api_key.clone();
+    println!("Using Prowlarr API Key: {}", api_key);
 
     let http_client = reqwest::Client::builder()
         .default_headers({
@@ -126,18 +111,58 @@ async fn search(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json
         }
     }
 
-    map.insert("dirs".to_string(), dirs.into());
     return Json(map).into_response();
 }
 
-async fn torrent_info(State(state): State<Arc<AxumState>>) -> Response {
-    println!("POST: /api/torrent-info");
+async fn torrent_stop(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json::Value>) -> Response {
+    println!("POST: /api/torrent-stop");
+    let ids = json["ids"].as_array().unwrap();
+    let id_vec: Vec<Id> = ids
+            .into_iter()
+            .map(|v| Id::Id(v.as_i64().unwrap()))
+            .collect();
     let transmission_url = format!(
         "http://{}:{}/transmission/rpc",
         &state.args.transmission_ipv4,
         &state.args.transmission_port
     );
-    let mut _client = TransClient::new(transmission_url.parse().unwrap());
+    let mut client = TransClient::new(transmission_url.parse().unwrap());
+    match client.torrent_action(transmission_rpc::types::TorrentAction::Stop, id_vec).await {
+        Ok(_) => {
+            println!("Torrent stopped successfully.");
+        }
+        Err(err) => {
+            println!("Error stopping torrent: {:?}", err);
+            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        }
+    }
+
+    StatusCode::OK.into_response()
+}
+
+async fn torrent_start(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json::Value>) -> Response {
+    println!("POST: /api/torrent-start");
+    let ids = json["ids"].as_array().unwrap();
+    let id_vec: Vec<Id> = ids
+            .into_iter()
+            .map(|v| Id::Id(v.as_i64().unwrap()))
+            .collect();
+    let transmission_url = format!(
+        "http://{}:{}/transmission/rpc",
+        &state.args.transmission_ipv4,
+        &state.args.transmission_port
+    );
+    let mut client = TransClient::new(transmission_url.parse().unwrap());
+    match client.torrent_action(transmission_rpc::types::TorrentAction::Start, id_vec).await {
+        Ok(_) => {
+            println!("Torrent started successfully.");
+        }
+        Err(err) => {
+            println!("Error starting torrent: {:?}", err);
+            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        }
+    }
+
     StatusCode::OK.into_response()
 }
 
@@ -204,19 +229,18 @@ async fn torrent_add(
         None => return (StatusCode::BAD_REQUEST, "missing downloadDir").into_response(),
     };
 
-    let download_dir = Path::new(&state.args.media_library)
+    let _download_dir = Path::new(&state.args.media_library)
         .join(folder)
         .to_str()
         .unwrap()
         .to_owned();
-    println!("downloadDir: {}", download_dir);
 
     let magnet_url = json["guid"].as_str().unwrap().to_owned();
     println!("magnetUrl: {}", magnet_url);
 
     let add = TorrentAddArgs {
         filename: Some(magnet_url),
-        download_dir: Some(download_dir),
+        // download_dir: Some(download_dir),
         ..TorrentAddArgs::default()
     };
 
