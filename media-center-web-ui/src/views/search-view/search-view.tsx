@@ -59,10 +59,10 @@ const SearchView = () => {
     const ws = webSocket.subscribe(session => {
       session.arguments.torrents.forEach(torrent => {
         setResults(
-          result => torrent.hashString.toLowerCase() === result.item.infoHash.toLowerCase(),
+          result => torrent.hashString.toLowerCase() === result.item.infoHash?.toLowerCase(),
           searchItem => ({
             ...searchItem,
-            session: session.arguments.torrents.find(t => t.hashString.toLowerCase() === searchItem.item.infoHash.toLowerCase())
+            session: session.arguments.torrents.find(t => t.hashString.toLowerCase() === searchItem.item.infoHash?.toLowerCase())
           }));
       });
     });

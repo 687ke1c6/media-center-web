@@ -16,7 +16,7 @@ const Root = (props: ParentProps) =>
             <NavBar appName="Downloader" links={[
                     { title: 'Home', path: '/' }, 
                     { title: 'Downloads', path: '/downloads' }, 
-                    // { title: 'Useful Links', path: '/useful-links' }
+                    { title: 'Services', path: '/useful-links' }
                 ]} />
             {props.children}
         </div>

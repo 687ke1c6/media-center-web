@@ -34,9 +34,13 @@ pub fn api_route(state: Arc<AxumState>) -> Router<Arc<AxumState>> {
 }
 
 async fn env() -> Response {
-    println!("POST: /api/env");
     let env_vars: serde_json::Map<String, Value> = std::env::vars()
         .map(|(k, v)| (k, Value::String(v)))
+        .filter(|(k, _)| {
+            return ["PROWLARR", "RADARR", "LIDARR", "SONARR", "TRANSMISSION", "RADARR_API_KEY"]
+                .iter()
+                .any(|&term| k.starts_with(term))
+        })
         .collect();
     Json(env_vars).into_response()
 }
