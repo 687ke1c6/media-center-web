@@ -1,4 +1,4 @@
-import { retry } from "rxjs";
+import { retry, shareReplay } from "rxjs";
 import { webSocket as createWebSocket } from 'rxjs/webSocket';
 import { Accessor, createContext, createSignal, ParentProps, useContext } from "solid-js";
 import { Session } from "../models/session.model";
@@ -15,6 +15,7 @@ const webSocket = createWebSocket<Session>({
     },
 })
     .pipe(
+        shareReplay(1),
         retry({ delay: 1000 }),
     );
 

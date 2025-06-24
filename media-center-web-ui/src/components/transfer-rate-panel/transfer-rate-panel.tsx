@@ -9,15 +9,19 @@ type Props = {
 
 const TransferRatesPanel = (props: ParentProps<Props>) => {
     return <div class="flex items-center text-xs text-gray-400 space-x-2">
-        <div class="flex items-center">
-            <ArrowBottomLeftThick />
-            <span>{toFsSize(props.torrent.rateDownload)}/s</span>
-        </div>
+        <span class="font-bold">[{props.torrent.status}]</span>
+        {props.torrent.status === 'Downloading' && 
+            <div class="flex items-center">
+                <ArrowBottomLeftThick />
+                <span>{toFsSize(props.torrent.rateDownload)}/s</span>
+            </div>
+        }
         <div class="flex items-center">
             <ArrowBottomLeftThick class="rotate-180" />
             <span>{toFsSize(props.torrent.rateUpload)}/s</span>
         </div>
-        <span>{toTime(props.torrent.eta)}</span>
+        {props.torrent.status === 'Downloading' && 
+            <span>{toTime(props.torrent.eta)}</span> }
     </div>
 }
 

@@ -24,9 +24,7 @@ const DownloadItem = (props: ParentProps<Props>) => {
                     classList={{ [styles.slideIn]: isToggled() }}>
                     <div class="truncate">{props.torrent.name}</div>
                     <div class="md:flex items-center space-y-1 md:space-y-0">
-                        <div class="flex">
-                            <TransferRatesPanel torrent={props.torrent} />
-                        </div>
+                        <TransferRatesPanel torrent={props.torrent} />
                         {props.torrent.status === 'Downloading' &&
                             <TransferProgressBar torrent={props.torrent} />}
                     </div>

@@ -37,7 +37,7 @@ async fn env() -> Response {
     let env_vars: serde_json::Map<String, Value> = std::env::vars()
         .map(|(k, v)| (k, Value::String(v)))
         .filter(|(k, _)| {
-            return ["PROWLARR", "RADARR", "LIDARR", "SONARR", "TRANSMISSION", "RADARR_API_KEY"]
+            return ["PROWLARR", "RADARR", "LIDARR", "SONARR", "TRANSMISSION"]
                 .iter()
                 .any(|&term| k.starts_with(term))
         })
