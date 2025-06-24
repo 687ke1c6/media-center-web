@@ -9,7 +9,7 @@ type Props = {
 
 const TransferRatesPanel = (props: ParentProps<Props>) => {
     return <div class="flex items-center text-xs text-gray-400 space-x-2">
-        <span class="font-bold">[{props.torrent.status}]</span>
+        <span class="">[{props.torrent.status}]</span>
         {props.torrent.status === 'Downloading' && 
             <div class="flex items-center">
                 <ArrowBottomLeftThick />

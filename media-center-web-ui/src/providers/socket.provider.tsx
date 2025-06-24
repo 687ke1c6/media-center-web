@@ -1,6 +1,6 @@
 import { retry, shareReplay } from "rxjs";
 import { webSocket as createWebSocket } from 'rxjs/webSocket';
-import { Accessor, createContext, createSignal, ParentProps, useContext } from "solid-js";
+import { Accessor, createContext, createEffect, createSignal, onCleanup, ParentProps, useContext } from "solid-js";
 import { Session } from "../models/session.model";
 
 const [connected, setConnected] = createSignal<boolean>(true);
@@ -26,12 +26,18 @@ const defaultSocketContext = {
 export const SocketContext = createContext(defaultSocketContext);
 export const SocketConnectedContext = createContext<{ connected: Accessor<boolean> }>({ connected });
 
-export const SocketProvider = ({ children }: ParentProps) =>
-    <SocketContext.Provider value={SocketContext.defaultValue}>
+export const SocketProvider = ({ children }: ParentProps) => {
+    createEffect(() => {
+        // ensure we have one subscription to the webSocket at all times.
+        const sub = webSocket.subscribe();
+        onCleanup(() =>  sub.unsubscribe());
+    })
+    return <SocketContext.Provider value={SocketContext.defaultValue}>
         <SocketConnectedContext.Provider value={SocketConnectedContext.defaultValue}>
             {children}
         </SocketConnectedContext.Provider>
-    </SocketContext.Provider>;
+    </SocketContext.Provider>
+}
 
 export const useSocketContext = () => {
     const context = useContext(SocketContext);

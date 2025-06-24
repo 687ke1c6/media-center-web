@@ -1,11 +1,11 @@
 import Link from '../link/Link';
-import { For, ParentProps, createEffect, createSignal } from 'solid-js';
+import { For, ParentProps, createEffect, createSignal, onCleanup } from 'solid-js';
 import JellyfinIcon from '../ux/jellyfin-icon/jellyfin-icon';
 import { MenuIcon } from '../ux/menu-icon/menu-icon';
 import { getIpInfo } from '../../services/api-service';
+import { useTorrentsStreamInfoContext } from '../../providers/torrents-stream-info-provider';
 
 type Props = {
-    appName: string;
     links?: {
         title: string;
         path: string;
@@ -14,30 +14,40 @@ type Props = {
 
 const NavBar = (props: ParentProps<Props>) => {
     const [menuToggle, setMenuToggle] = createSignal(false);
+    const [numSeeding, setNumSeeding] = createSignal(0);
+    const [numTotal, setNumTotal] = createSignal(0);
     const [ipInfo, setIpInfo] = createSignal<Awaited<ReturnType<typeof getIpInfo>> | null>(null);
+    const infoObservable = useTorrentsStreamInfoContext();
+
     createEffect(() => {
         getIpInfo().then((data) => {
             setIpInfo(data);
         }).catch((error) => {
             console.error('Error fetching IP info:', error);
         });
+        const infoSub = infoObservable.subscribe((info) => {
+            setNumSeeding(info.seeding);
+            setNumTotal(info.total);
+        });
+        onCleanup(() => infoSub.unsubscribe());
     })
     return (
         <nav class="flex flex-col md:items-center md:flex-row py-6 relative">
             <div>
                 <Link classNames="flex items-center dark:text-white w-fit" to="/">
                     <JellyfinIcon width={30} />
-                    <span class="font-semibold text-xl tracking-tight uppercase ms-2">{props.appName}</span>
+                    <span class="font-semibold text-xl tracking-tight uppercase ms-2">Downloader</span>
+                    <span class='text-sm ml-2'>[{numSeeding()}/{numTotal()}]</span>
                 </Link>
             </div>
 
             {ipInfo() &&
                 <a href={`https://ipinfo.io/${ipInfo()!.ip}`} 
                     target="_blank" 
-                    class="md:absolute mt-2 md:mt-0 md:right-4 text-xs items-center w-auto text-sm text-gray-500 dark:text-gray-400">
+                    class="md:absolute mt-2 md:mt-0 md:right-4 text-xs items-center w-auto text-sm text-gray-500 dark:text-gray-400 w-fit">
                     <span >
                         <span>{ipInfo()!.city}, </span>
-                        <span>({ipInfo()!.country})</span>
+                        <span>{ipInfo()!.country}</span>
                         <span class="md:hidden"> - [ {ipInfo()!.ip} ]</span>
                     </span>
                 </a>}

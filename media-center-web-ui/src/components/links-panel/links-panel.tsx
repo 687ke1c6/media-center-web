@@ -24,18 +24,24 @@ export const LinksPanel = (_props: ParentProps) => {
         <div class="flex flex-col md:flex-row gap-5 items-center justify-center flex w-full h-full">
             {env().PROWLARR_IPV4 &&
                 <LinkBadge to={`${protocolAndHostWithoutPort}:${env().PROWLARR_PORT || 9696}`}>
-                    <ProwlarrIcon width={24} height={24} />
-                    <span>Prowlarr</span>
+                    <div class="flex items-center space-x-2">
+                        <ProwlarrIcon width={24} height={24} />
+                        <span>Prowlarr</span>
+                    </div>
                 </LinkBadge>}
             {env().RADARR_IPV4 &&
                 <LinkBadge to={`${protocolAndHostWithoutPort}:${env().RADARR_PORT || 7878}`}>
-                    <RadarrIcon width={24} height={24} />
-                    <span>Radarr</span>
+                    <div class="flex items-center space-x-2">
+                        <RadarrIcon width={24} height={24} />
+                        <span>Radarr</span>
+                    </div>
                 </LinkBadge>}
             {env().SONARR_IPV4 &&
                 <LinkBadge to={`${protocolAndHostWithoutPort}:${env().SONARR_PORT || 8989}`}>
-                    <SonarrIcon width={24} height={24} />
-                    <span>Sonarr</span>
+                    <div class="flex items-center space-x-2">
+                        <SonarrIcon width={24} height={24} />
+                        <span>Sonarr</span>
+                    </div>
                 </LinkBadge>}
         </div>
     );

@@ -8,7 +8,7 @@ import Button from "../../components/button/button";
 import SearchBar from "../../components/search-bar/SearchBar";
 import Dialog from "../../components/dialog/dialog";
 import TorrentItemView from "../torrent-item-view/torrent-item-view";
-import {SocketContext} from "../../contexts/socket-context";
+import {SocketContext} from "../../providers/socket.provider";
 import SearchItem from "../../components/search-item/search-item";
 
 const SearchView = () => {

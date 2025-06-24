@@ -1,27 +1,33 @@
 import _ from 'lodash';
-import { For, Match, Switch, onCleanup, onMount, useContext } from "solid-js";
+import { For, Match, Switch, createSignal, onCleanup, onMount, useContext } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { Session, Torrent } from "../../models/session.model";
 import DownloadItem from "../../components/download-item/download-item";
 import { spaceY } from '../../utils/tailwind.utils';
-import { postTorrentInfo } from '../../services/api-service';
-import { SocketContext } from '../../contexts/socket-context';
+import { postTorrentInfo, postTorrentRemove } from '../../services/api-service';
+import { SocketContext } from '../../providers/socket.provider';
 
 const DownloadsView = () => {
     const [torrents, setTorrents] = createStore<Session['arguments']>({ torrents: [] });
+    const [seeding, setSeeding] = createSignal<string[]>([]);
     const { webSocket } = useContext(SocketContext);
 
     onMount(() => {
-        const sub = webSocket.subscribe(session =>
-            setTorrents('torrents', reconcile(session.arguments.torrents)));
+        const sub = webSocket.subscribe(session => {
+            setSeeding(session.arguments.torrents.filter(t => t.status === 'Seeding').map(t => t.id));
+            setTorrents('torrents', reconcile(session.arguments.torrents));
+        });
         onCleanup(() => sub.unsubscribe());
     });
 
     const onTorrentClick = (torrent: Torrent) => {
         postTorrentInfo({ id: torrent.id })
-            .then(value => {
-                console.log(value);
-            })
+            .then();
+        }
+
+    const onDeleteCompleteTorrents = (remove: boolean) => {
+        postTorrentRemove({ ids: seeding().map(parseInt), remove })
+            .then();
     }
 
     return <div>
@@ -34,6 +40,18 @@ const DownloadsView = () => {
                         }
                     </For>
                 </div>
+                {seeding().length > 0 &&
+                    <div class="flex items-center justify-center gap-2">
+                        <button class="bg-rose-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4"
+                            onClick={() => onDeleteCompleteTorrents(false)}>
+                            Remove Complete
+                        </button>
+                        <button class="bg-rose-700 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4"
+                            onClick={() => onDeleteCompleteTorrents(true)}>
+                            Delete Complete
+                        </button>
+                    </div>
+                }
             </Match>
         </Switch>
     </div>
