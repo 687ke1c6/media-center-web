@@ -20,7 +20,7 @@ const TransferRatesPanel = (props: ParentProps<Props>) => {
             <ArrowBottomLeftThick class="rotate-180" />
             <span>{toFsSize(props.torrent.rateUpload)}/s</span>
         </div>
-        {props.torrent.status === 'Downloading' && 
+        {props.torrent.status === 'Downloading' && parseInt(props.torrent.eta, 10) > 0 &&
             <span>{toTime(props.torrent.eta)}</span> }
     </div>
 }
