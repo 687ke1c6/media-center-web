@@ -14,7 +14,8 @@ const DownloadsView = () => {
 
     onMount(() => {
         const sub = webSocket.subscribe(session => {
-            setSeeding(session.arguments.torrents.filter(t => t.status === 'Seeding').map(t => t.id));
+            const seedingIds = session.arguments.torrents.filter(t => t.status === 'Seeding').map(t => t.id);
+            setSeeding(seedingIds);
             setTorrents('torrents', reconcile(session.arguments.torrents));
         });
         onCleanup(() => sub.unsubscribe());
@@ -26,7 +27,9 @@ const DownloadsView = () => {
         }
 
     const onDeleteCompleteTorrents = (remove: boolean) => {
-        postTorrentRemove({ ids: seeding().map(parseInt), remove })
+        const ids = seeding().map(id => parseInt(id, 10));
+        console.log('Removing torrents:', ids, 'Remove:', remove);
+        postTorrentRemove({ ids, remove })
             .then();
     }
 
