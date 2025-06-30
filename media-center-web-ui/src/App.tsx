@@ -7,7 +7,7 @@ import { TorrentsStreamInfoProvider, useTorrentsStreamInfoContext } from "./prov
 
 const SearchView = lazy(() => import("./views/search-view/search-view"));
 const DownloadsView = lazy(() => import('./views/downloads-view/downloads-view'));
-const UsefulLinksView = lazy(() => import('./views/useful-links-view/useful-links-view'));
+const UsefulLinksView = lazy(() => import('./views/services-view/services-view'));
 
 const queryClient = new QueryClient();
 

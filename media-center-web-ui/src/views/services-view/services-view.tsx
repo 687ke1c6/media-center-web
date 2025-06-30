@@ -1,9 +1,9 @@
 import { LinksPanel } from "../../components/links-panel/links-panel";
 
-const UsefulLinksView = () => {
+const ServicesView = () => {
     return (
         <LinksPanel />
     );
 }
 
-export default UsefulLinksView;
+export default ServicesView;

@@ -28,11 +28,21 @@ type IpInfo = {
     postal: string; // e.g. "94043"
     readme: string; // e.g. "https://ipinfo.io/missingauth
 };
+type Commit = {
+    commit: string,
+    author: string,
+    date: string,
+    message: string
+}
+
 export const getIpInfo = () =>
     getJson<IpInfo>('/api/ipinfo');
 
 export const getEnv = () =>
     getJson<Record<string, string>>('/api/env');
+
+export const getCommit = () =>
+    getJson<Commit>('/api/commit');
 
 export const torrentStop = (data: { ids: number[] }) =>
     postJsonOnly('/api/torrent-stop', data);

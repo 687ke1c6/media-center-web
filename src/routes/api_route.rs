@@ -1,9 +1,6 @@
-use std::{
-    path::Path, sync::Arc,
-};
 use crate::{
-    models::{axum_state::AxumState, rpc::RpcResponseProxy},
     libs::transmission,
+    models::{axum_state::AxumState, rpc::RpcResponseProxy},
 };
 use axum::{
     extract::State,
@@ -14,10 +11,12 @@ use axum::{
 };
 use reqwest::{Client, RequestBuilder};
 use serde_json::Value;
+use std::{path::Path, sync::Arc};
 use transmission_rpc::{
     types::{Id, SessionSetArgs, TorrentAddArgs},
     TransClient,
 };
+use walkdir::WalkDir;
 
 pub fn api_route(state: Arc<AxumState>) -> Router<Arc<AxumState>> {
     Router::new()
@@ -30,16 +29,46 @@ pub fn api_route(state: Arc<AxumState>) -> Router<Arc<AxumState>> {
         .route("/torrent-add", post(torrent_add))
         .route("/torrent-stop", post(torrent_stop))
         .route("/torrent-start", post(torrent_start))
+        .route("/media", get(list_files))
+        .route("/commit", get(commit))
         .with_state(state)
+}
+
+async fn commit() -> Response {
+    // println current working directory
+    println!("Current working directory: {:?}", std::env::current_dir());
+    // read from commit.json file which is located in the root of the project
+    let commit_file_path = Path::new("commit.json");
+    if !commit_file_path.exists() {
+        return StatusCode::NOT_FOUND.into_response();
+    }
+    let commit_data = std::fs::read_to_string(commit_file_path);
+    match commit_data {
+        Ok(data) => {
+            let json: serde_json::Value =
+                serde_json::from_str(&data).unwrap_or(serde_json::Value::Null);
+            return Json(json).into_response();
+        },
+        Err(_) => {
+            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        }
+    }
 }
 
 async fn env() -> Response {
     let env_vars: serde_json::Map<String, Value> = std::env::vars()
         .map(|(k, v)| (k, Value::String(v)))
         .filter(|(k, _)| {
-            return ["PROWLARR", "RADARR", "LIDARR", "SONARR", "TRANSMISSION"]
-                .iter()
-                .any(|&term| k.starts_with(term))
+            return [
+                "PROWLARR",
+                "RADARR",
+                "LIDARR",
+                "SONARR",
+                "TRANSMISSION",
+                "JELLYFIN",
+            ]
+            .iter()
+            .any(|&term| k.starts_with(term));
         })
         .collect();
     Json(env_vars).into_response()
@@ -71,14 +100,15 @@ async fn ipinfo() -> Response {
     StatusCode::INTERNAL_SERVER_ERROR.into_response()
 }
 
-async fn search(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json::Value>) -> Response {
-
+async fn search(
+    State(state): State<Arc<AxumState>>,
+    Json(json): Json<serde_json::Value>,
+) -> Response {
     let prowlarr_url: String = format!(
         "{}/api/v1/search?query={}",
         format!(
             "http://{}:{}",
-            &state.args.prowlarr_ipv4,
-            &state.args.prowlarr_port
+            &state.args.prowlarr_ipv4, &state.args.prowlarr_port
         ),
         url_escape::encode_component(json["search_term"].as_str().unwrap())
     );
@@ -90,10 +120,7 @@ async fn search(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json
     let http_client = reqwest::Client::builder()
         .default_headers({
             let mut headers = reqwest::header::HeaderMap::new();
-            headers.insert(
-                "X-Api-Key",
-                api_key.parse().unwrap(),
-            );
+            headers.insert("X-Api-Key", api_key.parse().unwrap());
             headers
         })
         .build()
@@ -118,20 +145,25 @@ async fn search(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json
     return Json(map).into_response();
 }
 
-async fn torrent_stop(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json::Value>) -> Response {
+async fn torrent_stop(
+    State(state): State<Arc<AxumState>>,
+    Json(json): Json<serde_json::Value>,
+) -> Response {
     println!("POST: /api/torrent-stop");
     let ids = json["ids"].as_array().unwrap();
     let id_vec: Vec<Id> = ids
-            .into_iter()
-            .map(|v| Id::Id(v.as_i64().unwrap()))
-            .collect();
+        .into_iter()
+        .map(|v| Id::Id(v.as_i64().unwrap()))
+        .collect();
     let transmission_url = format!(
         "http://{}:{}/transmission/rpc",
-        &state.args.transmission_ipv4,
-        &state.args.transmission_port
+        &state.args.transmission_ipv4, &state.args.transmission_port
     );
     let mut client = TransClient::new(transmission_url.parse().unwrap());
-    match client.torrent_action(transmission_rpc::types::TorrentAction::Stop, id_vec).await {
+    match client
+        .torrent_action(transmission_rpc::types::TorrentAction::Stop, id_vec)
+        .await
+    {
         Ok(_) => {
             println!("Torrent stopped successfully.");
         }
@@ -144,20 +176,25 @@ async fn torrent_stop(State(state): State<Arc<AxumState>>, Json(json): Json<serd
     StatusCode::OK.into_response()
 }
 
-async fn torrent_start(State(state): State<Arc<AxumState>>, Json(json): Json<serde_json::Value>) -> Response {
+async fn torrent_start(
+    State(state): State<Arc<AxumState>>,
+    Json(json): Json<serde_json::Value>,
+) -> Response {
     println!("POST: /api/torrent-start");
     let ids = json["ids"].as_array().unwrap();
     let id_vec: Vec<Id> = ids
-            .into_iter()
-            .map(|v| Id::Id(v.as_i64().unwrap()))
-            .collect();
+        .into_iter()
+        .map(|v| Id::Id(v.as_i64().unwrap()))
+        .collect();
     let transmission_url = format!(
         "http://{}:{}/transmission/rpc",
-        &state.args.transmission_ipv4,
-        &state.args.transmission_port
+        &state.args.transmission_ipv4, &state.args.transmission_port
     );
     let mut client = TransClient::new(transmission_url.parse().unwrap());
-    match client.torrent_action(transmission_rpc::types::TorrentAction::Start, id_vec).await {
+    match client
+        .torrent_action(transmission_rpc::types::TorrentAction::Start, id_vec)
+        .await
+    {
         Ok(_) => {
             println!("Torrent started successfully.");
         }
@@ -170,8 +207,44 @@ async fn torrent_start(State(state): State<Arc<AxumState>>, Json(json): Json<ser
     StatusCode::OK.into_response()
 }
 
-async fn torrent_get(State(state): State<Arc<AxumState>>) -> Response {
+async fn list_files(State(state): State<Arc<AxumState>>) -> Response {
+    #[derive(serde::Serialize)]
+    struct FileInfo {
+        path: String,
+        file_name: String,
+        is_dir: bool,
+        size: Option<u64>,
+        modified: Option<String>,
+    }
 
+    let base_path = Path::new(&state.args.media_library).join(&state.args.media_library);
+
+    let files: Vec<FileInfo> = WalkDir::new(&base_path)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .map(|entry| {
+            let file_type = entry.file_type();
+            let metadata = entry.metadata().ok();
+            let size = metadata.as_ref().map(|m| m.len());
+            let modified = metadata
+                .as_ref()
+                .and_then(|m| m.modified().ok())
+                .and_then(|mtime| Some(chrono::DateTime::<chrono::Utc>::from(mtime).to_rfc3339()));
+
+            FileInfo {
+                path: entry.path().to_string_lossy().to_string(),
+                file_name: entry.file_name().to_string_lossy().to_string(),
+                is_dir: file_type.is_dir(),
+                size,
+                modified,
+            }
+        })
+        .collect();
+
+    Json(files).into_response()
+}
+
+async fn torrent_get(State(state): State<Arc<AxumState>>) -> Response {
     match transmission::torrent_get(&state.args).await {
         Ok(response) => {
             let response: RpcResponseProxy = (&response).into();
@@ -199,8 +272,7 @@ async fn torrent_remove(
             .collect();
         let transmission_url = format!(
             "http://{}:{}/transmission/rpc",
-            &state.args.transmission_ipv4,
-            &state.args.transmission_port
+            &state.args.transmission_ipv4, &state.args.transmission_port
         );
         let mut client = TransClient::new(transmission_url.parse().unwrap());
         let remove_response = client
@@ -223,8 +295,7 @@ async fn torrent_add(
     println!("POST: /api/torrent-add");
     let transmission_url = format!(
         "http://{}:{}/transmission/rpc",
-        &state.args.transmission_ipv4,
-        &state.args.transmission_port
+        &state.args.transmission_ipv4, &state.args.transmission_port
     );
     let mut client = TransClient::new(transmission_url.parse().unwrap());
 

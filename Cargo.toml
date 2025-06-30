@@ -20,3 +20,5 @@ url-escape = "0.1.1"
 resolve-path = "0.1.0"
 quick-xml = { version = "0.37.5", features = ["serde", "serialize"] }
 anyhow = "1.0.98"
+chrono = "0.4.41"
+walkdir = "2.5.0"
