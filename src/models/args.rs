@@ -24,10 +24,6 @@ pub struct Args {
     /// Download speed limit kbps
     #[arg(short('s'), long, env)]
     pub speed_limit_down: Option<i32>,
-    
-    /// Script to run after torrent has complete
-    #[arg(short('f'), long, env)]
-    pub script_torrent_done_filename: Option<String>,
 
     /// Prowlarr IPv4 Address
     #[arg(short('r'), long, env)]

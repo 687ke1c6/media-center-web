@@ -322,15 +322,6 @@ async fn torrent_add(
         ..SessionSetArgs::default()
     };
 
-    if let Some(script_torrent_done_filename) = &state.args.script_torrent_done_filename {
-        println!(
-            "script_torrent_done_filename={}",
-            script_torrent_done_filename
-        );
-        session.script_torrent_done_enabled = Some(true);
-        session.script_torrent_done_filename = Some(script_torrent_done_filename.to_owned());
-    }
-
     if let Some(limit) = &state.args.speed_limit_down {
         session.speed_limit_down_enabled = Some(true);
         session.speed_limit_down = Some(*limit);
