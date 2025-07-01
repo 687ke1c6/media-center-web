@@ -24,7 +24,7 @@ const Root = (props: ParentProps) => {
         <NavBar links={[
             { title: 'Home', path: '/' },
             { title: 'Downloads', path: '/downloads' },
-            { title: 'Services', path: '/useful-links' }
+            { title: 'Services', path: '/services' }
         ]} />
         {props.children}
     </div>
@@ -41,7 +41,7 @@ const App = () => {
                 <HashRouter root={Root}>
                     <Route path='/' component={SearchView} />
                     <Route path={'/downloads'} component={DownloadsView} />
-                    <Route path={'/useful-links'} component={UsefulLinksView} />
+                    <Route path={'/services'} component={UsefulLinksView} />
                 </HashRouter>
             </TorrentsStreamInfoProvider>
         </SocketProvider>

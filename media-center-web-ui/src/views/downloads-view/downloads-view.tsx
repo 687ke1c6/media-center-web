@@ -6,6 +6,8 @@ import DownloadItem from "../../components/download-item/download-item";
 import { spaceY } from '../../utils/tailwind.utils';
 import { postTorrentInfo, postTorrentRemove } from '../../services/api-service';
 import { SocketContext } from '../../providers/socket.provider';
+import Divider from '../../components/divider/divider';
+import LinkButton from '../../components/button/link-button';
 
 const DownloadsView = () => {
     const [torrents, setTorrents] = createStore<Session['arguments']>({ torrents: [] });
@@ -24,7 +26,7 @@ const DownloadsView = () => {
     const onTorrentClick = (torrent: Torrent) => {
         postTorrentInfo({ id: torrent.id })
             .then();
-        }
+    }
 
     const onDeleteCompleteTorrents = (remove: boolean) => {
         const ids = seeding().map(id => parseInt(id, 10));
@@ -33,7 +35,7 @@ const DownloadsView = () => {
             .then();
     }
 
-    return <div>
+    return <div class="flex flex-col h-full">
         <Switch fallback={<div class="flex justify-center items-center"><p>...no downloads [ yet! ]...</p></div>}>
             <Match when={torrents.torrents.length}>
                 <div class={`divide-y divide-dashed divide-gray-300 dark:divide-gray-500 mx-2 ${spaceY}`}>
@@ -44,16 +46,19 @@ const DownloadsView = () => {
                     </For>
                 </div>
                 {seeding().length > 0 &&
-                    <div class="flex items-center justify-center gap-2">
-                        <button class="bg-rose-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4"
-                            onClick={() => onDeleteCompleteTorrents(false)}>
-                            Remove Complete
-                        </button>
-                        <button class="bg-rose-700 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4"
-                            onClick={() => onDeleteCompleteTorrents(true)}>
-                            Delete Complete
-                        </button>
-                    </div>
+                    <>
+                        <Divider />
+                        <div class="flex items-center justify-center gap-2">
+                            <LinkButton
+                                onClick={() => onDeleteCompleteTorrents(false)}>
+                                Remove Complete
+                            </LinkButton>
+                            <LinkButton
+                                onClick={() => onDeleteCompleteTorrents(true)}>
+                                Delete Complete
+                            </LinkButton>
+                        </div>
+                    </>
                 }
             </Match>
         </Switch>

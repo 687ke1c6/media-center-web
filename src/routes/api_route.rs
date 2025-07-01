@@ -29,15 +29,12 @@ pub fn api_route(state: Arc<AxumState>) -> Router<Arc<AxumState>> {
         .route("/torrent-add", post(torrent_add))
         .route("/torrent-stop", post(torrent_stop))
         .route("/torrent-start", post(torrent_start))
-        .route("/media", get(list_files))
+        // .route("/media", get(_list_files))
         .route("/commit", get(commit))
         .with_state(state)
 }
 
 async fn commit() -> Response {
-    // println current working directory
-    println!("Current working directory: {:?}", std::env::current_dir());
-    // read from commit.json file which is located in the root of the project
     let commit_file_path = Path::new("commit.json");
     if !commit_file_path.exists() {
         return StatusCode::NOT_FOUND.into_response();
@@ -207,7 +204,7 @@ async fn torrent_start(
     StatusCode::OK.into_response()
 }
 
-async fn list_files(State(state): State<Arc<AxumState>>) -> Response {
+async fn _list_files(State(state): State<Arc<AxumState>>) -> Response {
     #[derive(serde::Serialize)]
     struct FileInfo {
         path: String,
