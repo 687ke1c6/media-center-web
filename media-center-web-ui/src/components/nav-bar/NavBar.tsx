@@ -16,6 +16,7 @@ const NavBar = (props: ParentProps<Props>) => {
     const [menuToggle, setMenuToggle] = createSignal(false);
     const [numSeeding, setNumSeeding] = createSignal(0);
     const [numTotal, setNumTotal] = createSignal(0);
+    const [numDownloads, setNumDownloads] = createSignal(0);
     const [ipInfo, setIpInfo] = createSignal<Awaited<ReturnType<typeof getIpInfo>> | null>(null);
     const infoObservable = useTorrentsStreamInfoContext();
 
@@ -28,6 +29,7 @@ const NavBar = (props: ParentProps<Props>) => {
         const infoSub = infoObservable.subscribe((info) => {
             setNumSeeding(info.seeding);
             setNumTotal(info.total);
+            setNumDownloads(info.downloads);
         });
         onCleanup(() => infoSub.unsubscribe());
     })
@@ -59,7 +61,8 @@ const NavBar = (props: ParentProps<Props>) => {
                 <For each={props.links}>
                     {(item, _index) =>
                         <Link classNames="md:inline-block block mt-2 md:mt-0 text-teal-700 w-fit hover:text-teal-500 dark:text-teal-200 dark:hover:text-white mr-4" to={item.path}>
-                            {item.title}
+                            <span>{item.title}</span>
+                            {item.title === 'Downloads' && numDownloads() > 0 && <span> ({numDownloads()})</span>}
                         </Link>}
                 </For>
             </div>
